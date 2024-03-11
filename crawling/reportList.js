@@ -80,7 +80,7 @@ const getReportList = async (url) => {
 
         await getReportList(url)
             .then(res => {
-                reportList.push(res);
+                reportList.push(...res);
             });
     };
 
