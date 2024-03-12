@@ -74,7 +74,7 @@ const getReportList = async (url) => {
 (async () => {
     const reportList = [];
 
-    for (let pageNum = 1; pageNum < 2; pageNum++) { //2145
+    for (let pageNum = 1; pageNum < 2145; pageNum++) {
         let url = homeUrl + "/research/company_list.naver?&page=" + pageNum;
         console.log(pageNum);
 
