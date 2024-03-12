@@ -23,7 +23,7 @@ async function processPDF(url, filePath, fileName) {
         response.data.on('end', () => {
             ocr(fileName.slice(0, -4))
                 .then(data => {
-                    // fs.unlinkSync(filePath);
+                    fs.unlinkSync(filePath);
                     resolve(data);
                 })
                 .catch(reject);
