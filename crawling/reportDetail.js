@@ -48,7 +48,7 @@ const getReport = async (url) => {
     const html = await fetchReport(url);
     const $ = cheerio.load(html);
 
-    const pdfUrl = $("vi.ew_report").find("a").attr("href");
+    const pdfUrl = $(".view_report").find("a").attr("href");
     const targetPrice = parseInt($(".money").find("strong").text().trim().replace(/,/g, ''));
     const investmentOpinion = $(".coment").text().trim();
 
