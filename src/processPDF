@@ -35,18 +35,19 @@ async function processPDF(url, filePath, fileName) {
 async function main() {
     const urls = await getUrls();
     const dirPath = path.join(__dirname, "../resources");
+    const nameEmail = [];
+    const problemUrls = [];
 
     if (!fs.existsSync(dirPath)) {
         fs.mkdirSync(dirPath);
     }
 
     const downloadInterval = 1000; // 다운로드 간격 (밀리초) 1000
-    const batchSize = 2; // 배치 크기 100
+    const batchSize = 100; // 배치 크기 100
 
-    // for (let i = 0; i < urls.length; i += batchSize) {
-    for (let i = 0; i < 4; i += batchSize) {
+    // for (let i = 0; i < 4; i += batchSize) {
+    for (let i = 0; i < urls.length; i += batchSize) {
         const batchUrls = urls.slice(i, i + batchSize);
-        const problemUrl = [];
 
         await Promise.all(batchUrls.map(url => {
             const fileName = url.substring(url.lastIndexOf("/") + 1);
@@ -57,17 +58,21 @@ async function main() {
                     console.log("fileName: ", fileName);
                     console.log(data);
                     const result = extractNameEmail(data);
+                    nameEmail.push(data);
                     console.log(result)
                     if (result === 'None') {
-                        problemUrl.push(url);
+                        problemUrls.push(url);
                     }
                 })
                 .catch(err => console.log(fileName, ': ', err));
         }));
 
-        console.log(problemUrl);
+        console.log(problemUrls);
         await new Promise(resolve => setTimeout(resolve, downloadInterval));
     }
+
+    fs.writeFileSync("../output/problemUrls.json", JSON.stringify(problemUrls));
+    fs.writeFileSync("../output/nameEmail.json", JSON.stringify(nameEmail));
 }
 
 main();
