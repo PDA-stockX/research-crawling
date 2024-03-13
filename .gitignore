@@ -1,3 +1,4 @@
 node_modules
 pdfservices-api-credentials.json
+pdfservices-api-credentials-pre.json
 .env

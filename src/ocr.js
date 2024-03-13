@@ -20,6 +20,15 @@ async function ocr(fileName) {
             .withClientSecret(client_secret)
             .build();
 
+        const configBuilderInstance = PDFServicesSdk.ClientConfig;
+
+        const clientConfig = configBuilderInstance
+            .clientConfigBuilder()
+            .withConnectTimeout(1000 * 10) // 10 seconds
+            .withReadTimeout(1000 * 60) // 1 minute
+            .withProcessingTimeout(1000 * 60 * 10) // 10 minutes
+            .build();
+
         // Create an ExecutionContext using credentials
         const executionContext = PDFServicesSdk.ExecutionContext.create(credentialsInstance);
 
@@ -42,7 +51,7 @@ async function ocr(fileName) {
         extractPDFOperation.setOptions(options);
 
         // Execute the operation and save the result to a temporary file
-        const outputFilePath = path.resolve(__dirname, `../output/${fileName}.zip`);
+        const outputFilePath = path.resolve(__dirname, `./output/${fileName}.zip`);
         await extractPDFOperation.execute(executionContext)
             .then(result => result.saveAsFile(outputFilePath));
 
@@ -52,7 +61,7 @@ async function ocr(fileName) {
         const data = JSON.parse(jsonString).elements
             .filter(element => element.Page === 0 && element.Text)
             .map(element => element.Text)
-            .join('|');
+            .join(' ');
 
         // Delete the temporary zip file
         await fs.unlink(outputFilePath); // 비동기 파일 삭제 사용
