@@ -1,3 +1,6 @@
+import getContent from './pdfjs.js';
+import path from 'path';
+
 function extractNameEmail(text) {
     // 애널리스트의 이메일 주소 추출
     const emailRegex = /(?:Analyst\s+)?([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-z.]+)(?:RA)?/;
@@ -20,6 +23,7 @@ function extractNameEmail(text) {
         else {
             let word = '';
             let i = index + 1;
+            console.log("now index: ", i);
 
             while (i < text.length && text.charAt(i) !== ' ') {
                 if (text.charAt(i) !== '\n') {
@@ -27,6 +31,7 @@ function extractNameEmail(text) {
                     i++;
                 }
             }
+            console.log("now word: ", word);
 
             if (word.match(nameRegex)) {
                 name = word;
@@ -39,11 +44,22 @@ function extractNameEmail(text) {
     if (email !== null && name === null) {
         const temp = text.indexOf(email);
         const emailIndex = temp !== -1 ? temp : text.indexOf('@');
+        console.log("start dfs index:", emailIndex);
         dfsLeft(emailIndex - 1);
     }
 
-    return { name, email }
+    return { name, email };
 }
 
-// module.exports = extractNameEmail;
-export default extractNameEmail;
+(async () => {
+    const url1 = 'https://ssl.pstatic.net/imgstock/upload/research/company/1710118917536.pdf';
+    const url2 = 'https://ssl.pstatic.net/imgstock/upload/research/company/1710119628567.pdf';
+
+    const text1 = await getContent(url1);
+    const text2 = await getContent(url2);
+
+    // console.log(text1);
+    // console.log(extractNameEmail(text1));
+    console.log(text2);
+    console.log(extractNameEmail(text2));
+})();

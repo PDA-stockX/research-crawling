@@ -1,5 +1,6 @@
 import axios from 'axios';
 import fs from 'fs';
+fs.WriteStream
 
 async function downloadPDF(url, filePath) {
     const response = await axios({
@@ -7,7 +8,6 @@ async function downloadPDF(url, filePath) {
         method: 'GET',
         responseType: 'stream'
     });
-
     response.data.pipe(fs.createWriteStream(filePath));
 
     return response.data;

@@ -10,15 +10,7 @@ async function getContent(url) {
         return ''
     }).join(' ')
 
-    const page2 = await doc.getPage(2)
-    const data2 = (await page2.getTextContent()).items.map(elem => {
-        if (elem.str) {
-            return elem.str
-        }
-        return ''
-    }).join(' ')
-
-    return data + ' ' + data2
+    return data
 }
 //https://ssl.pstatic.net/imgstock/upload/research/company/1710113405251.pdf
 // const filePath = '../resources/1710113405251.pdf';

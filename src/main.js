@@ -21,46 +21,40 @@ async function main() {
         fs.mkdirSync(dirPath);
     }
 
-    const downloadInterval = 1000; // 다운로드 간격 (밀리초) 
-    const batchSize = 10; // 배치 크기
+    const downloadInterval = 50000; // 다운로드 간격 (밀리초) 
+    const batchSize = 5; // 배치 크기
 
-    // for (let i = 0; i < urls.length; i += batchSize) {
-    for (let i = 0; i < 50; i += batchSize) {
-        const batchUrls = urls.slice(i, i + batchSize);
-
+    const downloadBatch = async (batchUrls) => {
         await Promise.all(batchUrls.map(async (url) => {
-            const fileName = url.substring(url.lastIndexOf("/") + 1);
-            const filePath = path.join(dirPath, fileName);
-
-            return downloadPDF(url, filePath)
-                .then(async (res) => {
-                    return new Promise((resolve, reject) => {
-                        res.on('end', async () => {
-                            const reportString = await getContent(filePath);
-                            console.log("fileName: ", fileName);
-                            console.log(reportString);
-                            const result = extractNameEmail(reportString);
-                            const temp = { pdfUrl: url, ...result };
-                            console.log(temp);
-                            nameEmail.push({ pdfUrl: url, ...result });
-                            if (result.name === null) {
-                                problemUrls.push(url);
-                            }
-                            fs.unlinkSync(filePath);
-                            resolve(result);
-                        });
-                        res.on('error', reject);
-                    });
-                })
-                .catch(err => console.log(fileName, ': ', err))
+            const reportString = await getContent(url);
+            const result = extractNameEmail(reportString);
+            const analystInfo = { pdfUrl: url, ...result };
+            nameEmail.push(analystInfo);
+            // console.log(reportString);
+            console.log(analystInfo);
+            if (!(result.name && result.email)) {
+                problemUrls.push(url);
+            }
+            return result
         }))
 
-        await new Promise(resolve => setTimeout(resolve, downloadInterval));
-    }
+    };
 
-    console.log("problemUrls: ", problemUrls);
-    fs.writeFileSync("../output/nameEmail.json", JSON.stringify(nameEmail));
-    fs.writeFileSync("../output/problemUrls.json", JSON.stringify(problemUrls));
+    const downloadBatches = async () => {
+        for (let i = 0; i < urls.length; i += batchSize) { // 20->urls.length
+            const batchUrls = urls.slice(i, i + batchSize);
+            await downloadBatch(batchUrls);
+            await new Promise(resolve => setTimeout(resolve, downloadInterval)).catch(err => console.error(err));
+        }
+    };
+
+    downloadBatches()
+        .then(() => {
+            console.log("problemUrls: ", problemUrls);
+            fs.writeFileSync("../output/nameEmail.json", JSON.stringify(nameEmail));
+            fs.writeFileSync("../output/problemUrls.json", JSON.stringify(problemUrls));
+        })
+        .catch(error => console.error('Error in main process:', error));
 }
 
 main();
