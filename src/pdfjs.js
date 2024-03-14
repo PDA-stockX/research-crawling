@@ -20,9 +20,5 @@ async function getContent(url) {
 
     return data + ' ' + data2
 }
-//https://ssl.pstatic.net/imgstock/upload/research/company/1710113405251.pdf
-// const filePath = '../resources/1710113405251.pdf';
-// getContent(filePath);
 
-// module.exports = getContent;
 export default getContent;

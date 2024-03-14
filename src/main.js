@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 
 import extractNameEmail from './extractNameEmail.js';
-import downloadPDF from './downloadPDF.js';
 import getContent from './pdfjs.js';
 
 async function getUrls() {
@@ -21,8 +20,13 @@ async function main() {
         fs.mkdirSync(dirPath);
     }
 
-    const downloadInterval = 50000; // 다운로드 간격 (밀리초) 
-    const batchSize = 5; // 배치 크기
+    const saveFile = () => {
+        fs.writeFileSync("../output/nameEmail.json", JSON.stringify(nameEmail));
+        fs.writeFileSync("../output/problemUrls.json", JSON.stringify(problemUrls));
+    };
+
+    const downloadInterval = 2000; // 다운로드 간격 (밀리초) 
+    const batchSize = 1; // 배치 크기
 
     const downloadBatch = async (batchUrls) => {
         await Promise.all(batchUrls.map(async (url) => {
@@ -37,24 +41,27 @@ async function main() {
             }
             return result
         }))
-
     };
 
     const downloadBatches = async () => {
-        for (let i = 0; i < urls.length; i += batchSize) { // 20->urls.length
+        const catchIndexes = [];
+        const n = urls.length;
+
+        for (let i = 0; i < n; i += batchSize) {
             const batchUrls = urls.slice(i, i + batchSize);
-            await downloadBatch(batchUrls);
+            await downloadBatch(batchUrls)
+                .then(() => { console.log("downloaded: ", i + batchSize, "/", n); saveFile(); })
+                .catch((err) => { catchIndexes.push(i); fs.writeFileSync("../output/stop.json", catchIndexes); })
             await new Promise(resolve => setTimeout(resolve, downloadInterval)).catch(err => console.error(err));
         }
     };
 
     downloadBatches()
-        .then(() => {
+        .catch(error => console.error('Error in main process:', error))
+        .finally(() => {
             console.log("problemUrls: ", problemUrls);
-            fs.writeFileSync("../output/nameEmail.json", JSON.stringify(nameEmail));
-            fs.writeFileSync("../output/problemUrls.json", JSON.stringify(problemUrls));
-        })
-        .catch(error => console.error('Error in main process:', error));
+            saveFile();
+        });
 }
 
 main();

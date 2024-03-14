@@ -13,5 +13,4 @@ async function downloadPDF(url, filePath) {
     return response.data;
 }
 
-// module.exports = downloadPDF;
 export default downloadPDF; 
