@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 
 import extractNameEmail from './extractNameEmail.js';
-import downloadPDF from './downloadPDF.js';
 import getContent from './pdfjs.js';
 
 async function getUrls() {
@@ -21,40 +20,53 @@ async function main() {
         fs.mkdirSync(dirPath);
     }
 
-    const downloadInterval = 50000; // 다운로드 간격 (밀리초) 
-    const batchSize = 5; // 배치 크기
-
-    const downloadBatch = async (batchUrls) => {
-        await Promise.all(batchUrls.map(async (url) => {
-            const reportString = await getContent(url);
-            const result = extractNameEmail(reportString);
-            const analystInfo = { pdfUrl: url, ...result };
-            nameEmail.push(analystInfo);
-            // console.log(reportString);
-            console.log(analystInfo);
-            if (!(result.name && result.email)) {
-                problemUrls.push(url);
-            }
-            return result
-        }))
-
+    const saveFile = () => {
+        fs.writeFileSync("../output/nameEmail.json", JSON.stringify(nameEmail));
+        fs.writeFileSync("../output/problemUrls.json", JSON.stringify(problemUrls));
     };
 
-    const downloadBatches = async () => {
-        for (let i = 0; i < urls.length; i += batchSize) { // 20->urls.length
-            const batchUrls = urls.slice(i, i + batchSize);
-            await downloadBatch(batchUrls);
+    const downloadInterval = 2000; // 다운로드 간격 (밀리초) 
+
+    const readBatch = async (url) => {
+        await getContent(url)
+            .then((reportString) => extractNameEmail(reportString))
+            .then((result) => {
+                const analystInfo = { pdfUrl: url, ...result };
+                nameEmail.push(analystInfo);
+                console.log(analystInfo);
+                if (!(result.name && result.email)) {
+                    problemUrls.push(url);
+                }
+            })
+            .catch(err => problemUrls.push(url));
+    };
+
+    const readBatches = async () => {
+        const catchProblems = [];
+        const n = urls.length;
+        let i = 1;
+
+        for (const url of urls) {
+            await readBatch(url)
+                .then(() => {
+                    console.log("read: ", i++, "/", n);
+                    saveFile();
+                })
+                .catch((err) => {
+                    console.log("readBatch err: ", err);
+                    catchProblems.push({ pdfUrl: url, index: i++ });
+                    fs.writeFileSync("../output/stop.json", catchProblems);
+                })
             await new Promise(resolve => setTimeout(resolve, downloadInterval)).catch(err => console.error(err));
         }
     };
 
-    downloadBatches()
-        .then(() => {
+    readBatches()
+        .catch(error => console.error('Error in readBatches:', error))
+        .finally(() => {
             console.log("problemUrls: ", problemUrls);
-            fs.writeFileSync("../output/nameEmail.json", JSON.stringify(nameEmail));
-            fs.writeFileSync("../output/problemUrls.json", JSON.stringify(problemUrls));
-        })
-        .catch(error => console.error('Error in main process:', error));
+            saveFile();
+        });
 }
 
 main();
