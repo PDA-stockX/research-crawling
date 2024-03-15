@@ -2,3 +2,8 @@ node_modules
 pdfservices-api-credentials.json
 pdfservices-api-credentials-pre.json
 .env
+nameEmail.json
+problemUrls.json
+reportDetail.json
+reportList.json
+stockDetail.json
