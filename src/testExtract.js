@@ -56,6 +56,7 @@ function extractNameEmail(text) {
     const url7 = 'https://ssl.pstatic.net/imgstock/upload/research/company/1710112767446.pdf';
     const url8 = 'https://ssl.pstatic.net/imgstock/upload/research/company/1709854066536.pdf';
     const url9 = 'https://ssl.pstatic.net/imgstock/upload/research/company/1708990764485.pdf';
+    const url10 = 'https://ssl.pstatic.net/imgstock/upload/research/company/1708990270924.pdf';
 
     const text1 = await getContent(url1); //삼성증권
     const text2 = await getContent(url2); //IBK투자증권
@@ -66,6 +67,7 @@ function extractNameEmail(text) {
     const text7 = await getContent(url7); //신한투자증권 연구위원
     const text8 = await getContent(url8); //신한투자증권 연구원
     const text9 = await getContent(url9); //유진투자증권
+    const text10 = await getContent(url10); //키움증권 해결 X
 
     // console.log(text1);
     console.log(extractNameEmail(text1));
@@ -85,4 +87,6 @@ function extractNameEmail(text) {
     console.log(extractNameEmail(text8));
     // console.log(text9);
     console.log(extractNameEmail(text9));
+    // console.log(text10);
+    console.log(extractNameEmail(text10));
 })();

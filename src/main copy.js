@@ -26,43 +26,38 @@ async function main() {
     };
 
     const downloadInterval = 2000; // 다운로드 간격 (밀리초) 
+    const batchSize = 1; // 배치 크기
 
-    const readBatch = async (url) => {
-        await getContent(url)
-            .then((reportString) => extractNameEmail(reportString))
-            .then((result) => {
-                const analystInfo = { pdfUrl: url, ...result };
-                nameEmail.push(analystInfo);
-                console.log(analystInfo);
-                if (!(result.name && result.email)) {
-                    problemUrls.push(url);
-                }
-            })
-            .catch(err => problemUrls.push(url));
+    const readBatch = async (batchUrls) => {
+        await Promise.all(batchUrls.map(async (url) => {
+            const reportString = await getContent(url);
+            const result = extractNameEmail(reportString);
+            const analystInfo = { pdfUrl: url, ...result };
+            nameEmail.push(analystInfo);
+            // console.log(reportString);
+            console.log(analystInfo);
+            if (!(result.name && result.email)) {
+                problemUrls.push(url);
+            }
+            return result
+        }))
     };
 
     const readBatches = async () => {
-        const catchProblems = [];
+        const catchIndexes = [];
         const n = urls.length;
-        let i = 1;
 
-        for (const url of urls) {
-            await readBatch(url)
-                .then(() => {
-                    console.log("read: ", i++, "/", n);
-                    saveFile();
-                })
-                .catch((err) => {
-                    console.log("readBatch err: ", err);
-                    catchProblems.push({ pdfUrl: url, index: i++ });
-                    fs.writeFileSync("../output/stop.json", catchProblems);
-                })
+        for (let i = 0; i < n; i += batchSize) {
+            const batchUrls = urls.slice(i, i + batchSize);
+            await readBatch(batchUrls)
+                .then(() => { console.log("downloaded: ", i + batchSize, "/", n); saveFile(); })
+                .catch((err) => { catchIndexes.push(i); fs.writeFileSync("../output/stop.json", catchIndexes); })
             await new Promise(resolve => setTimeout(resolve, downloadInterval)).catch(err => console.error(err));
         }
     };
 
     readBatches()
-        .catch(error => console.error('Error in readBatches:', error))
+        .catch(error => console.error('Error in main process:', error))
         .finally(() => {
             console.log("problemUrls: ", problemUrls);
             saveFile();

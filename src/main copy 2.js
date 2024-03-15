@@ -10,7 +10,12 @@ async function getUrls() {
 }
 
 async function main() {
-    const urls = await getUrls();
+    // const urls = await getUrls();
+    const urls = [
+        'https://ssl.pstatic.net/imgstock/upload/research/company/1710119151881.pdf',
+        "https://ssl.pstatic.net/imgstock/upload/research/company/1708990270924.pdf",
+        "https://ssl.pstatic.net/imgstock/upload/research/company/1709103775681.pdf",
+    ];
     const dirPath = path.join(process.cwd(), "../resources");
 
     const nameEmail = [];
@@ -21,8 +26,8 @@ async function main() {
     }
 
     const saveFile = () => {
-        fs.writeFileSync("../output/nameEmail.json", JSON.stringify(nameEmail));
-        fs.writeFileSync("../output/problemUrls.json", JSON.stringify(problemUrls));
+        fs.writeFileSync("../outputTEST/nameEmail.json", JSON.stringify(nameEmail));
+        fs.writeFileSync("../outputTEST/problemUrls.json", JSON.stringify(problemUrls));
     };
 
     const downloadInterval = 2000; // 다운로드 간격 (밀리초) 
@@ -53,9 +58,9 @@ async function main() {
                     saveFile();
                 })
                 .catch((err) => {
-                    console.log("readBatch err: ", err);
+                    console.log("readBatch log ", err);
                     catchProblems.push({ pdfUrl: url, index: i++ });
-                    fs.writeFileSync("../output/stop.json", catchProblems);
+                    fs.writeFileSync("../outputTEST/stop.json", catchProblems);
                 })
             await new Promise(resolve => setTimeout(resolve, downloadInterval)).catch(err => console.error(err));
         }
