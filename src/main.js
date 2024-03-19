@@ -38,7 +38,7 @@ async function main() {
                     problemUrls.push(url);
                 }
             })
-            .catch(err => problemUrls.push(url));
+            .catch(err => problemUrls.push(url)); // nameEmail에도 problemUrls 버전으로 넣어야했음
     };
 
     const readBatches = async () => {

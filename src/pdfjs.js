@@ -10,15 +10,19 @@ async function getContent(url) {
         return ''
     }).join(' ')
 
-    const page2 = await doc.getPage(2)
-    const data2 = (await page2.getTextContent()).items.map(elem => {
-        if (elem.str) {
-            return elem.str
-        }
-        return ''
-    }).join(' ')
+    if (doc.numPages >= 2) {
+        const page2 = await doc.getPage(2)
+        const data2 = (await page2.getTextContent()).items.map(elem => {
+            if (elem.str) {
+                return elem.str
+            }
+            return ''
+        }).join(' ')
 
-    return data + ' ' + data2
+        return data + ' ' + data2
+    }
+
+    return data;
 }
 
 export default getContent;
