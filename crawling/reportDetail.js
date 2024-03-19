@@ -1,7 +1,7 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
-const fs = require('fs');
-const iconv = require('iconv-lite')
+import axios from "axios";
+import cheerio from "cheerio";
+import fs from 'fs';
+import iconv from 'iconv-lite';
 
 const headers = {
     'authority': 'finance.naver.com',
@@ -51,13 +51,22 @@ const getReport = async (url) => {
     const pdfUrl = $(".view_report").find("a").attr("href");
     const targetPrice = parseInt($(".money").find("strong").text().trim().replace(/,/g, ''));
     const investmentOpinion = $(".coment").text().trim();
+    const title = $("view_sbj").text().trim();
+    let summary = "";
+    for (const el of $(".view_cnt")) {
+        const header = $(el).find("div div font span b").text().trim();
+        const body = $(el).find("div div font span").text().trim();
 
-    const report = { pdfUrl, targetPrice, investmentOpinion };
+        summary += header + "\n";
+        console.log(paragraph);
+    }
 
+    const report = { pdfUrl, targetPrice, investmentOpinion, title, summary };
+    console.log(report);
     return report;
 };
 
-(async () => {
+const reportDetail = async () => {
     const reportList = JSON.parse(fs.readFileSync('../data/reportList.json'));
     const reportDetail = [];
 
@@ -73,4 +82,8 @@ const getReport = async (url) => {
     }
 
     fs.writeFileSync("../data/reportDetail.json", JSON.stringify(reportDetail));
-})();
+};
+
+await getReport("https://finance.naver.com/research/company_read.naver?nid=72277&page=1");
+
+// export default reportDetail;

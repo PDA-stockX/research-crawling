@@ -1,7 +1,7 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
-const fs = require('fs');
-const iconv = require('iconv-lite')
+import axios from "axios";
+import cheerio from "cheerio";
+import fs from 'fs';
+import iconv from 'iconv-lite';
 
 const headers = {
     "authority": "finance.naver.com",
@@ -45,7 +45,16 @@ async function fetchReportList(url) {
     }
 }
 
-const getReportList = async (url) => {
+const str2date = (dateString) => { //24.03.19
+    const year = parseInt(dateString.substring(0, 2), 10);
+    const month = parseInt(dateString.substring(3, 5), 10) - 1;
+    const day = parseInt(dateString.substring(6), 10);
+
+    const date = new Date(2000 + year, month, day);
+    return date;
+}
+
+const getReportList = async (url, start, end) => {
     const html = await fetchReportList(url);
     const $ = cheerio.load(html);
     const reportList = [];
@@ -57,32 +66,53 @@ const getReportList = async (url) => {
             const stockDetailUrl = $(el).find("td").eq(0).find("a").attr("href");
             const reportDetailUrl = $(el).find("td").eq(1).find("a").attr("href");
             const firm = $(el).find("td").eq(2).text().trim();
-            const date = $(el).find("td").eq(4).text().trim();
+            const date = str2date($(el).find("td").eq(4).text().trim());
+            const stock = $(el).find("td").eq(0).find("a").attr("title");
 
-            reportList.push({
-                stockDetailUrl: homeUrl + stockDetailUrl,
-                reportDetailUrl: homeUrl + "/research/" + reportDetailUrl,
-                firm,
-                date
-            });
+            if (date <= start && date > end) {
+                reportList.push({
+                    stockDetailUrl: homeUrl + stockDetailUrl,
+                    reportDetailUrl: homeUrl + "/research/" + reportDetailUrl,
+                    firm,
+                    date,
+                    stock
+                });
+            }
+            else { break };
         }
     }
-
     return reportList;
 };
 
-(async () => {
+const getLastPageNum = async (url) => {
+    const html = await fetchReportList(url);
+    const $ = cheerio.load(html);
+
+    const num = parseInt($("td.pgRR").find("a").prop("href").split("=")[1]);
+
+    return num;
+};
+
+const reportList = async (
+    start = new Date(new Date().setHours(23, 59, 0, 0)),
+    end = new Date(new Date(Date.now() - 86400000).setHours(0, 0, 0, 0))
+) => {
+
     const reportList = [];
 
-    for (let pageNum = 1; pageNum < 2145; pageNum++) {
+    const lastPageNum = await getLastPageNum(homeUrl + "/research/company_list.naver?&page=" + 1);
+    for (let pageNum = 1; pageNum <= lastPageNum; pageNum++) {
         let url = homeUrl + "/research/company_list.naver?&page=" + pageNum;
         console.log(pageNum);
 
-        await getReportList(url)
-            .then(res => {
-                reportList.push(...res);
-            });
+        const res = await getReportList(url, start, end)
+        if (res.length === 0) {
+            break
+        }
+        reportList.push(...res);
     };
 
     fs.writeFileSync("../data/reportList.json", JSON.stringify(reportList));
-})();
+};
+
+export default reportList;
