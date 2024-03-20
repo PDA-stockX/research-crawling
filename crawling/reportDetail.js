@@ -3,6 +3,8 @@ import cheerio from "cheerio";
 import fs from 'fs';
 import iconv from 'iconv-lite';
 
+import { str2date, date2str } from '../main/date.js';
+
 const headers = {
     'authority': 'finance.naver.com',
     'method': 'GET',

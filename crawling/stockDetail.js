@@ -3,6 +3,8 @@ const cheerio = require("cheerio");
 const fs = require('fs');
 const iconv = require('iconv-lite')
 
+import { str2date, date2str } from '../main/date.js';
+
 const headers = {
     'authority': 'finance.naver.com',
     'method': 'GET',
