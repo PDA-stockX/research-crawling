@@ -51,18 +51,23 @@ const getReport = async (url) => {
     const pdfUrl = $(".view_report").find("a").attr("href");
     const targetPrice = parseInt($(".money").find("strong").text().trim().replace(/,/g, ''));
     const investmentOpinion = $(".coment").text().trim();
-    const title = $("view_sbj").text().trim();
-    let summary = "";
-    for (const el of $(".view_cnt")) {
-        const header = $(el).find("div div font span b").text().trim();
-        const body = $(el).find("div div font span").text().trim();
+    const title = $(".view_sbj").contents().filter(function () {
+        return this.nodeType === 3; // 텍스트 노드만 필터링
+    }).text().trim();
 
-        summary += header + "\n";
-        console.log(paragraph);
-    }
+    const summary = $(".view_cnt div").html();
+    // const summary = $(".view_cnt div*").contents().map(function () {
+    //     if (this.nodeType === 3) {
+    //         console.log("textnode: ", $(this).text().trim());
+    //         return $(this).text().trim().length > 0 ? $(this).text().trim() : null;
+    //     } else if (this.tagName === 'br') {
+    //         return '\n';
+    //     }
+    //     console.log(this.nodeType, this.tagName);
+    // }).get().join('\n');
+    // console.log(summary);
 
     const report = { pdfUrl, targetPrice, investmentOpinion, title, summary };
-    console.log(report);
     return report;
 };
 
@@ -84,6 +89,8 @@ const reportDetail = async () => {
     fs.writeFileSync("../data/reportDetail.json", JSON.stringify(reportDetail));
 };
 
-await getReport("https://finance.naver.com/research/company_read.naver?nid=72277&page=1");
+await getReport("https://finance.naver.com/research/company_read.naver?nid=72284&page=1");
+// await getReport("https://finance.naver.com/research/company_read.naver?nid=72260&page=1");
+// await getReport("https://finance.naver.com/research/company_read.naver?nid=71712&page=20");
 
 // export default reportDetail;
