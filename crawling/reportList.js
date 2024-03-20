@@ -90,13 +90,12 @@ const reportList = async (
     start = new Date(new Date().setHours(23, 59, 0, 0)),
     end = new Date(new Date(Date.now() - 86400000).setHours(0, 0, 0, 0))
 ) => {
-
     const reportList = [];
-
     const lastPageNum = await getLastPageNum(homeUrl + "/research/company_list.naver?&page=" + 1);
+
+    console.log("crawling reportList...");
     for (let pageNum = 1; pageNum <= lastPageNum; pageNum++) {
         let url = homeUrl + "/research/company_list.naver?&page=" + pageNum;
-        console.log(pageNum);
 
         const res = await getReportList(url, start, end)
         if (res.length === 0) {
