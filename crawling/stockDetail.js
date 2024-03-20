@@ -57,7 +57,7 @@ const getStock = async (url) => {
     return stock;
 };
 
-(async () => {
+const stockDetail = async (start) => {
     const reportList = JSON.parse(fs.readFileSync('../data/reportList.json'));
     const stocks = [];
 
@@ -72,5 +72,11 @@ const getStock = async (url) => {
             .catch(err => console.log(err));
     }
 
-    fs.writeFileSync("../data/stockDetail.json", JSON.stringify(stocks));
-})();
+    const dirPath = `../data/${date2str(start)}`
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath);
+    }
+    fs.writeFileSync(`${dirPath}/stockDetail.json`, JSON.stringify(stocks));
+};
+
+export default stockDetail;
