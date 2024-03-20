@@ -19,6 +19,7 @@ const fetchStockApi = async (date, ticker, maxRetries = 30) => {
         };
 
         const url = `${BASE_URL}?${new URLSearchParams(params).toString()}`;
+        console.log(url);
 
         const response = await axios.get(url);
         return parseInt(response.data.response.body.items.item[0].clpr);
@@ -116,6 +117,7 @@ const openApi = async (start, startIndex, apiCount) => {
 
         console.log(i + 1, " / ", reportList.length, "\t", count, " / ", apiCount);
 
+        console.log("saved date: ", date);
         fs.writeFileSync(`${dirPath}/Analyst.json`, JSON.stringify(Analyst));
         fs.writeFileSync(`${dirPath}/Firm.json`, JSON.stringify([...Firm]));
         fs.writeFileSync(`${dirPath}/Report.json`, JSON.stringify(Report));
@@ -123,3 +125,11 @@ const openApi = async (start, startIndex, apiCount) => {
     }
 }
 export default openApi;
+// openApi();
+
+// const postedAt = str2date("23.12.29");
+// const ticker = '000660'
+// const refPrice = await fetchStockApi(postedAt, ticker);
+// console.log("postedAt: ", postedAt);
+// console.log("ticker: ", ticker);
+// console.log("refPrice: ", refPrice);

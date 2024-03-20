@@ -1,13 +1,14 @@
-import join from "./join.js";
+import openApi from "./openApi.js";
 
-const main = () => {
+const main = (start, startIndex = 0, apiCount = 1000) => {
     /**
      * join 된 index:  (i+1)7472  /  64296   (count)4935  /  10000
      */
-    const start = 7472; // index i
-    const apiCount = 5000; // api 호출 횟수
+    // start = new Date(new Date().setHours(23, 59, 0, 0)); // 시작 날짜
+    // startIndex = 0; // i index (defalut: 0)
+    // apiCount = 25; // api로 가져오려는 데이터 갯수 (default: 1000)
 
-    // join(start, apiCount);
+    openApi(start, startIndex, apiCount);
 }
 
-main();
+export default main;
