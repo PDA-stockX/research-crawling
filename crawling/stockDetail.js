@@ -1,7 +1,7 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
-const fs = require('fs');
-const iconv = require('iconv-lite')
+import axios from "axios";
+import cheerio from "cheerio";
+import fs from 'fs';
+import iconv from 'iconv-lite';
 
 import { str2date, date2str } from '../main/date.js';
 
@@ -63,9 +63,9 @@ const stockDetail = async (start) => {
     const reportList = JSON.parse(fs.readFileSync('../data/reportList.json'));
     const stocks = [];
 
+    console.log("crawling stockDetail...");
     for (const report of reportList) {
         let url = report.stockDetailUrl;
-        console.log(url);
 
         await getStock(url)
             .then(res => {
