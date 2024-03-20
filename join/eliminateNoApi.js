@@ -38,4 +38,4 @@ const eliminateNoApi = async () => {
     fs.writeFileSync(`${dirPath}/ReportSector.json`, JSON.stringify(newReportSector));
 }
 
-eliminateNoApi();
+// eliminateNoApi();

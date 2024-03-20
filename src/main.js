@@ -4,9 +4,9 @@ import path from 'path';
 import extractNameEmail from './extractNameEmail.js';
 import getContent from './pdfjs.js';
 
-import { str2date, date2str } from '../main/date.js';
+import { str2date, date2str } from '../batch/date.js';
 
-async function getUrls(dataPath, start) {
+async function getUrls(dataPath) {
     const json = JSON.parse(fs.readFileSync(`${dataPath}/reportDetail.json`));
     return Object.values(json).map(item => item.pdfUrl);
 }
