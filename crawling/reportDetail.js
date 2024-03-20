@@ -61,7 +61,7 @@ const getReport = async (url) => {
     return report;
 };
 
-const reportDetail = async () => {
+const reportDetail = async (start) => {
     const reportList = JSON.parse(fs.readFileSync('../data/reportList.json'));
     const reportDetail = [];
 
