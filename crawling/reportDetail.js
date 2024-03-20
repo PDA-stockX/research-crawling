@@ -64,7 +64,8 @@ const getReport = async (url) => {
 };
 
 const reportDetail = async (start) => {
-    const reportList = JSON.parse(fs.readFileSync('../data/reportList.json'));
+    const dirPath = `../data/${date2str(start)}`
+    const reportList = JSON.parse(fs.readFileSync(`${dirPath}/reportList.json`));
     const reportDetail = [];
 
     console.log("crawling reportDetail...");
@@ -78,7 +79,6 @@ const reportDetail = async (start) => {
             .catch(err => console.log(err));
     }
 
-    const dirPath = `../data/${date2str(start)}`
     if (!fs.existsSync(dirPath)) {
         fs.mkdirSync(dirPath);
     }
