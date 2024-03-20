@@ -67,9 +67,9 @@ const reportDetail = async (start) => {
     const reportList = JSON.parse(fs.readFileSync('../data/reportList.json'));
     const reportDetail = [];
 
+    console.log("crawling reportDetail...");
     for (const report of reportList) {
         let url = report.reportDetailUrl;
-        console.log(url);
 
         await getReport(url)
             .then(res => {
