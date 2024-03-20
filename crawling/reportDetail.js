@@ -75,8 +75,11 @@ const reportDetail = async () => {
             })
             .catch(err => console.log(err));
     }
-
-    fs.writeFileSync("../data/reportDetail.json", JSON.stringify(reportDetail));
+    const dirPath = `../data/${date2str(start)}`
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath);
+    }
+    fs.writeFileSync(`${dirPath}/reportDetail.json`, JSON.stringify(reportDetail));
 };
 
 export default reportDetail;
