@@ -3,6 +3,8 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 dotenv.config({ path: '../.env' });
 
+import { str2date, date2str } from '../main/date.js';
+
 const fetchStockApi = async (date, ticker, maxRetries = 5) => {
     let retries = 0;
     while (retries < maxRetries) {
@@ -40,24 +42,6 @@ const getData = async () => {
     return ({ reportList, reportDetail, stockDetail, nameEmail, photoUrls });
 }
 
-const str2date = (dateString) => {
-    const year = parseInt(dateString.substring(0, 2), 10);
-    const month = parseInt(dateString.substring(3, 5), 10) - 1;
-    const day = parseInt(dateString.substring(6), 10);
-
-    const date = new Date(2000 + year, month, day);
-    return date;
-}
-
-const date2str = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1 해줍니다.
-    const day = String(date.getDate()).padStart(2, '0');
-
-    const dateString = `${year}${month}${day}`;
-    return dateString;
-}
-
 const join = async (start = 0, apiCount = 10) => {
     const lostUrls = [];
     const nullUrls = [];
@@ -79,7 +63,8 @@ const join = async (start = 0, apiCount = 10) => {
         let name, email;
 
         const temp = reportList[i].firm;
-        const firm = temp !== "대우증권" ? temp : "미래에셋증권";
+        // const firm = temp !== "대우증권" ? temp : "미래에셋증권";
+        const firm = temp;
         const postedAt = str2date(reportList[i].date);
         const { pdfUrl, targetPrice, investmentOpinion } = reportDetail[i];
         const { ticker, sectors } = stockDetail[i];
