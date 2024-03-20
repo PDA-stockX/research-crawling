@@ -75,6 +75,7 @@ const reportDetail = async () => {
             })
             .catch(err => console.log(err));
     }
+
     const dirPath = `../data/${date2str(start)}`
     if (!fs.existsSync(dirPath)) {
         fs.mkdirSync(dirPath);
