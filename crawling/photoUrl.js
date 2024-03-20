@@ -49,5 +49,9 @@ const getLogo = async () => {
     return data.get();
 }
 
-const photoUrls = await getLogo();
-fs.writeFileSync("../data/photoUrls.json", JSON.stringify(photoUrls));
+const photoUrl = async () => {
+    const photoUrls = await getLogo();
+    fs.writeFileSync("../data/photoUrls.json", JSON.stringify(photoUrls));
+}
+
+export default photoUrl;
