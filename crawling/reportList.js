@@ -3,6 +3,8 @@ import cheerio from "cheerio";
 import fs from 'fs';
 import iconv from 'iconv-lite';
 
+import { str2date, date2str } from '../main/date.js';
+
 const headers = {
     "authority": "finance.naver.com",
     "method": "GET",
@@ -43,15 +45,6 @@ async function fetchReportList(url) {
         console.error(err);
         throw err;
     }
-}
-
-const str2date = (dateString) => { //24.03.19
-    const year = parseInt(dateString.substring(0, 2), 10);
-    const month = parseInt(dateString.substring(3, 5), 10) - 1;
-    const day = parseInt(dateString.substring(6), 10);
-
-    const date = new Date(2000 + year, month, day);
-    return date;
 }
 
 const getReportList = async (url, start, end) => {
@@ -112,7 +105,11 @@ const reportList = async (
         reportList.push(...res);
     };
 
-    fs.writeFileSync("../data/reportList.json", JSON.stringify(reportList));
+    const dirPath = `../data/${date2str(start)}`
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath);
+    }
+    fs.writeFileSync(`${dirPath}/reportList.json`, JSON.stringify(reportList));
 };
 
 export default reportList;
