@@ -86,10 +86,7 @@ const getLastPageNum = async (url) => {
     return num;
 };
 
-const reportList = async (
-    start = new Date(new Date().setHours(23, 59, 0, 0)),
-    end = new Date(new Date(Date.now() - 86400000).setHours(0, 0, 0, 0))
-) => {
+const reportList = async (start, end) => {
     const reportList = [];
     const lastPageNum = await getLastPageNum(homeUrl + "/research/company_list.naver?&page=" + 1);
 
