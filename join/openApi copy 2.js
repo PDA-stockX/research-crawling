@@ -51,7 +51,13 @@ const fetchStockApi = async (date, ticker, maxRetries = 10) => {
         }
     }
 
-    throw new Error("Max retries exceeded"); // 프로그램 종료를 위해 예외 발생
+    try {
+        refDate = new Date(new Date(date).setDate(date.getDate() + 1));
+        return await doApi();
+    } catch (err) {
+        console.error("An error occurred:", err);
+        throw new Error("Max retries exceeded"); // 프로그램 종료를 위해 예외 발생
+    }
 }
 
 const getData = async (dataPath, outputPath) => {
@@ -71,7 +77,7 @@ const openApi = async (start, startIndex, apiCount) => {
     const dateStr = date2str(start);
     const dataPath = `../data/${dateStr}`
     const outputPath = `../output/${dateStr}`
-    const dirPath = `../result/${dateStr}_${startIndex}`
+    const dirPath = `../result/${dateStr}`
 
     const { reportList, reportDetail, stockDetail, nameEmail, photoUrls } = await getData(dataPath, outputPath);
     console.log(reportList.length, reportDetail.length, stockDetail.length, nameEmail.length)
@@ -88,6 +94,7 @@ const openApi = async (start, startIndex, apiCount) => {
         let name, email;
         const { firm, date, stock } = reportList[i];
         let refDate = new Date(date);
+        refDate.setDate(refDate.getDate() - 1);
         const { pdfUrl, targetPrice, investmentOpinion, title, summary } = reportDetail[i];
         const { ticker, sectors } = stockDetail[i];
 

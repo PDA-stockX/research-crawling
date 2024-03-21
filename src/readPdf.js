@@ -69,7 +69,7 @@ async function readPdf(start) {
         }
     };
 
-    readBatches()
+    await readBatches()
         .catch(error => console.error('Error in readBatches:', error))
         .finally(() => {
             saveFile();
