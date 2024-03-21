@@ -1,7 +1,9 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
-const fs = require('fs');
-const iconv = require('iconv-lite')
+import axios from "axios";
+import cheerio from "cheerio";
+import fs from 'fs';
+import iconv from 'iconv-lite';
+
+import { str2date, date2str } from '../batch/date.js';
 
 const headers = {
     "authority": "finance.naver.com",
@@ -45,7 +47,7 @@ async function fetchReportList(url) {
     }
 }
 
-const getReportList = async (url) => {
+const getReportList = async (url, start, end) => {
     const html = await fetchReportList(url);
     const $ = cheerio.load(html);
     const reportList = [];
@@ -57,32 +59,53 @@ const getReportList = async (url) => {
             const stockDetailUrl = $(el).find("td").eq(0).find("a").attr("href");
             const reportDetailUrl = $(el).find("td").eq(1).find("a").attr("href");
             const firm = $(el).find("td").eq(2).text().trim();
-            const date = $(el).find("td").eq(4).text().trim();
+            const date = str2date($(el).find("td").eq(4).text().trim());
+            const stock = $(el).find("td").eq(0).find("a").attr("title");
 
-            reportList.push({
-                stockDetailUrl: homeUrl + stockDetailUrl,
-                reportDetailUrl: homeUrl + "/research/" + reportDetailUrl,
-                firm,
-                date
-            });
+            if (date <= start && date > end) {
+                reportList.push({
+                    stockDetailUrl: homeUrl + stockDetailUrl,
+                    reportDetailUrl: homeUrl + "/research/" + reportDetailUrl,
+                    firm,
+                    date,
+                    stock
+                });
+            }
+            else { break };
         }
     }
-
     return reportList;
 };
 
-(async () => {
+const getLastPageNum = async (url) => {
+    const html = await fetchReportList(url);
+    const $ = cheerio.load(html);
+
+    const num = parseInt($("td.pgRR").find("a").prop("href").split("=")[1]);
+
+    return num;
+};
+
+const reportList = async (start, end) => {
     const reportList = [];
+    const lastPageNum = await getLastPageNum(homeUrl + "/research/company_list.naver?&page=" + 1);
 
-    for (let pageNum = 1; pageNum < 2145; pageNum++) {
+    console.log("crawling reportList...");
+    for (let pageNum = 1; pageNum <= lastPageNum; pageNum++) {
         let url = homeUrl + "/research/company_list.naver?&page=" + pageNum;
-        console.log(pageNum);
 
-        await getReportList(url)
-            .then(res => {
-                reportList.push(...res);
-            });
+        const res = await getReportList(url, start, end)
+        if (res.length === 0) {
+            break
+        }
+        reportList.push(...res);
     };
 
-    fs.writeFileSync("../data/reportList.json", JSON.stringify(reportList));
-})();
+    const dirPath = `../data/${date2str(start)}`
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath);
+    }
+    fs.writeFileSync(`${dirPath}/reportList.json`, JSON.stringify(reportList));
+};
+
+export default reportList;

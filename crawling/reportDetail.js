@@ -1,7 +1,9 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
-const fs = require('fs');
-const iconv = require('iconv-lite')
+import axios from "axios";
+import cheerio from "cheerio";
+import fs from 'fs';
+import iconv from 'iconv-lite';
+
+import { str2date, date2str } from '../batch/date.js';
 
 const headers = {
     'authority': 'finance.naver.com',
@@ -51,19 +53,24 @@ const getReport = async (url) => {
     const pdfUrl = $(".view_report").find("a").attr("href");
     const targetPrice = parseInt($(".money").find("strong").text().trim().replace(/,/g, ''));
     const investmentOpinion = $(".coment").text().trim();
+    const title = $(".view_sbj").contents().filter(function () {
+        return this.nodeType === 3;
+    }).text().trim();
 
-    const report = { pdfUrl, targetPrice, investmentOpinion };
+    const summary = $(".view_cnt div").html();
 
+    const report = { pdfUrl, targetPrice, investmentOpinion, title, summary };
     return report;
 };
 
-(async () => {
-    const reportList = JSON.parse(fs.readFileSync('../data/reportList.json'));
+const reportDetail = async (start) => {
+    const dirPath = `../data/${date2str(start)}`
+    const reportList = JSON.parse(fs.readFileSync(`${dirPath}/reportList.json`));
     const reportDetail = [];
 
+    console.log("crawling reportDetail...");
     for (const report of reportList) {
         let url = report.reportDetailUrl;
-        console.log(url);
 
         await getReport(url)
             .then(res => {
@@ -72,5 +79,10 @@ const getReport = async (url) => {
             .catch(err => console.log(err));
     }
 
-    fs.writeFileSync("../data/reportDetail.json", JSON.stringify(reportDetail));
-})();
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath);
+    }
+    fs.writeFileSync(`${dirPath}/reportDetail.json`, JSON.stringify(reportDetail));
+};
+
+export default reportDetail;

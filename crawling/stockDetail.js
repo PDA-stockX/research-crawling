@@ -1,7 +1,9 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
-const fs = require('fs');
-const iconv = require('iconv-lite')
+import axios from "axios";
+import cheerio from "cheerio";
+import fs from 'fs';
+import iconv from 'iconv-lite';
+
+import { str2date, date2str } from '../batch/date.js';
 
 const headers = {
     'authority': 'finance.naver.com',
@@ -57,13 +59,14 @@ const getStock = async (url) => {
     return stock;
 };
 
-(async () => {
-    const reportList = JSON.parse(fs.readFileSync('../data/reportList.json'));
+const stockDetail = async (start) => {
+    const dirPath = `../data/${date2str(start)}`
+    const reportList = JSON.parse(fs.readFileSync(`${dirPath}/reportList.json`));
     const stocks = [];
 
+    console.log("crawling stockDetail...");
     for (const report of reportList) {
         let url = report.stockDetailUrl;
-        console.log(url);
 
         await getStock(url)
             .then(res => {
@@ -72,5 +75,10 @@ const getStock = async (url) => {
             .catch(err => console.log(err));
     }
 
-    fs.writeFileSync("../data/stockDetail.json", JSON.stringify(stocks));
-})();
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath);
+    }
+    fs.writeFileSync(`${dirPath}/stockDetail.json`, JSON.stringify(stocks));
+};
+
+export default stockDetail;
