@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 
 import extractNameEmail from './extractNameEmail.js';
 import getContent from './pdfjs.js';
@@ -16,7 +15,7 @@ async function readPdf(start) {
     const dataPath = `../data/${dateStr}`
 
     const urls = await getUrls(dataPath);
-    const dirPath = path.join(process.cwd(), `../output/${dateStr}`);
+    const dirPath = `../output/${dateStr}`;
 
     const nameEmail = [];
     const problemUrls = [];
