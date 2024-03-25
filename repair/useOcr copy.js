@@ -4,8 +4,7 @@ import AdmZip from 'adm-zip';
 import iconv from 'iconv-lite';
 import dotenv from 'dotenv';
 dotenv.config({ path: '../.env' });
-
-import getPDF from './getPDF copy.js';
+import getPDF from './getPDF copy 2.js';
 
 async function useOcr(url) {
     try {
@@ -54,51 +53,72 @@ async function useOcr(url) {
         extractPDFOperation.setOptions(options);
 
         // Execute the operation and save the result to a temporary file
-        const outputFilePath = './temp2.zip';
-        // console.log('executionContext: ', executionContext);
+        const outputFilePath = './temp2.zip';;
         await extractPDFOperation.execute(executionContext)
             .then(result => result.saveAsFile(outputFilePath));
 
         // Extract text data from the temporary zip file and return it
-        const zip = new AdmZip(outputFilePath);
-        const jsonString = zip.readAsText('structuredData.json');
-        const data = JSON.parse(jsonString).elements
-            .filter(element => element.Text)
-            .map(element => element.Text)
-            .join(' ');
-
         // const zip = new AdmZip(outputFilePath);
-        // const zipEntries = zip.getEntries(); // zip 파일 내의 모든 파일 항목
-
-        // // 'structuredData.json' 파일을 찾아서 그 내용을 읽어옴
-        // let jsonString;
-        // zipEntries.forEach((entry) => {
-        //     if (entry.entryName === 'structuredData.json') {
-        //         const contentBuffer = entry.getData(); // Buffer 형태로 데이터 읽어옴
-        //         // iconv-lite를 사용하여 'euc-kr'로 디코딩
-        //         jsonString = iconv.decode(contentBuffer, 'CP949');
-        //     }
-        // });
-
+        // const jsonString = zip.readAsText('structuredData.json');
         // const data = JSON.parse(jsonString).elements
         //     .filter(element => element.Text)
         //     .map(element => element.Text)
         //     .join(' ');
+        const zip = new AdmZip(outputFilePath);
+        const zipEntries = zip.getEntries(); // zip 파일 내의 모든 파일 항목
+
+        // 'structuredData.json' 파일을 찾아서 그 내용을 읽어옴
+        let jsonString;
+        zipEntries.forEach((entry) => {
+            if (entry.entryName === 'structuredData.json') {
+                const contentBuffer = entry.getData(); // Buffer 형태로 데이터 읽어옴
+                // iconv-lite를 사용하여 'euc-kr'로 디코딩
+                const iso8859String = Buffer.from(contentBuffer, 'latin2')
+                jsonString = iconv.decode(iso8859String, 'iso-8859-2');
+                console.log(jsonString)
+                console.log("-".repeat(10))
+            }
+        });
+
+
+        const data = JSON.parse(jsonString).elements
+            .filter(element => element.Text)
+            .map(element => element.Text)
+        // .join(' ');
 
         // Delete the temporary zip file
-        // fs.unlink(outputFilePath, (err) => {
-        //     if (err) {
-        //         console.error('Error deleting temporary file:', err);
-        //     } else {
-        //         console.log('Temporary file deleted successfully');
-        //     }
-        // });
+        fs.unlink(outputFilePath, (err) => {
+            if (err) {
+                console.error('Error deleting temporary file:', err);
+            } else {
+                console.log('Temporary file deleted successfully');
+            }
+        });
 
         console.log(data);
+        console.log("-".repeat(10))
+
+
+        // const someEncodedString = Buffer.from(data, 'utf-8').toString();
+        // console.log(someEncodedString)
+
+        for (let i of data) {
+            const iso8859String = Buffer.from(i, 'binary')
+            console.log(iso8859String)
+            jsonString = iconv.decode(iso8859String, 'iso-8859-2');
+
+            console.log(jsonString)
+            console.log("-".repeat(10))
+        }
+
+
         return data;
     } catch (err) {
         console.log('Exception encountered while executing operation', err);
     }
 }
-useOcr("https://ssl.pstatic.net/imgstock/upload/research/company/1711067985855.pdf")
+
+useOcr("https://ssl.pstatic.net/imgstock/upload/research/company/1711067985855.pdf") // 미래에셋증권 1.7
+// useOcr("https://ssl.pstatic.net/imgstock/upload/research/company/1711321768799.pdf") // 유안타증권 1.7
+// useOcr("https://ssl.pstatic.net/imgstock/upload/research/company/1711336124480.pdf") // 교보증권 1.7
 // export default useOcr;

@@ -13,13 +13,19 @@
     "@adobe/pdfservices-node-sdk": "3.4.0",
     "adm-zip": "^0.5.10",
     "axios": "^1.6.7",
+    "base64-stream": "^1.0.0",
     "cheerio": "^1.0.0-rc.12",
     "dotenv": "^16.4.5",
     "fs": "^0.0.1-security",
     "iconv-lite": "^0.6.3",
+    "jschardet": "^3.1.1",
+    "jsdom": "^24.0.0",
     "mammoth": "^1.7.0",
+    "node-tesseract-ocr": "^2.2.1",
     "openai": "^4.28.4",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^4.0.379"
+    "pdfjs-dist": "^4.0.379",
+    "puppeteer": "^10.4.0",
+    "stream": "^0.0.2"
   }
 }

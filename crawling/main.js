@@ -9,7 +9,7 @@ const main = async (start, end) => {
         fs.mkdirSync("../data");
     }
 
-    await photoUrl();
+    // await photoUrl();
 
     await reportList(start, end);
 
