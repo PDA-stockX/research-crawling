@@ -31,13 +31,12 @@ const repair = async (start) => {
         fs.mkdirSync(dirPath);
     }
 
-    console.log("nullUrls: ", nullUrls.length);
     for (const nullUrl of nullUrls) {
         const { i, pdfUrl } = nullUrl;
         const { name, firm, email, photoUrl } = Analyst[i];
 
-        problemFirms.push({ firm: Analyst[i].firm, pdfUrl });
-        problemFirmSet.add(Analyst[i].firm);
+        problemFirms.push({ firm, pdfUrl });
+        problemFirmSet.add(firm);
 
         // console.log(i, pdfUrl, name, firm, email, photoUrl);
 
@@ -73,8 +72,8 @@ const repair = async (start) => {
         fs.writeFileSync("./problemFirmSet.json", JSON.stringify([...problemFirmSet]));
     }
 
+    console.log("nullUrls: ", nullUrls.length);
     console.log(problemFirmSet);
-    console.log("countPdf: ", countPdf, "\tcountOcr: ", countOcr);
 };
 
 repair(new Date("2024-03-20T23:59:59"));
