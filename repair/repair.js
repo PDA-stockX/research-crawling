@@ -22,9 +22,9 @@ const repair = async (start) => {
     const resultPath = `../result/${dateStr}`
 
     const { Analyst, Report, nullUrls } = await getData(resultPath);
-    let problemFirmSet = new Set();
-    let problemFirms = [];
 
+    let problemFirms = [];
+    let problemFirmSet = new Set();
     const dirPath = './temp';
 
     if (!fs.existsSync(dirPath)) {
@@ -37,6 +37,7 @@ const repair = async (start) => {
         const { name, firm, email, photoUrl } = Analyst[i];
 
         problemFirms.push({ firm: Analyst[i].firm, pdfUrl });
+        problemFirmSet.add(Analyst[i].firm);
 
         // console.log(i, pdfUrl, name, firm, email, photoUrl);
 
@@ -49,7 +50,6 @@ const repair = async (start) => {
                     Analyst[i].name = result.name;
                     Report[i].name = result.name;
                 });
-            problemFirmSet.add(Analyst[i].firm);
         }
         else if (ocrFirms.includes(firm)) {
             console.log("ocr version");
@@ -60,10 +60,8 @@ const repair = async (start) => {
             //         Analyst[i].name = result.name;
             //         Report[i].name = result.name;
             //     });
-            problemFirmSet.add(Analyst[i].firm);
         }
         else {
-            problemFirmSet.add(Analyst[i].firm);
             console.log("non covered")
         }
         // console.log(Analyst[i]);
