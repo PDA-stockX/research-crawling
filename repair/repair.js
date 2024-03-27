@@ -74,5 +74,5 @@ const repair = async (start) => {
     console.log("nullUrls: ", nullUrls.length);
     console.log(problemFirmSet);
 };
-
-repair(new Date("2024-03-20T23:59:59"));
+// repair(new Date("2024-03-20T23:59:59"));
+export default repair;

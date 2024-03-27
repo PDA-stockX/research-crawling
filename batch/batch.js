@@ -25,6 +25,9 @@ cron.schedule('0 10 * * 1-5', async (
     await api(start, startIndex, apiCount);
     // startIndex: i index (defalut: 0)
     // apiCount: api로 가져오려는 데이터 갯수 (default: 100)
+
+    console.log("repair...");
+    await repair(start);
 }, {
     timezone: "Asia/Seoul" // 시간대 설정 (예: 서울 시간대)
 });

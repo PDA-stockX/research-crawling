@@ -8,7 +8,7 @@ function usePdfjs(text) {
     const classIndex = classMatch ? classMatch.index : 0;
 
     // 이름 추출을 위한 정규표현식
-    const nameRegex = /^(?!.*(팀장|대리|사원|선임|수석|연구원|연구위원|전문위원|차전지|자동차))[ㄱ-ㅎㅏ-ㅣ가-힣_]{3,4}/;
+    const nameRegex = /^(?!.*(팀장|대리|사원|선임|수석|연구원|연구위원|전문위원|차전지|자동차|반도체))[ㄱ-ㅎㅏ-ㅣ가-힣_]{3,4}/;
 
     // 이메일 시작 인덱스를 기준으로 왼쪽으로 이동하며 이름을 찾기
     function shiftLeft(index) {
