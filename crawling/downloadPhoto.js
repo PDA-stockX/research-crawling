@@ -12,22 +12,27 @@ const downloadPhoto = async () => {
     }
 
     for (const url of urls) {
-        let response;
         if (url.photoUrl.endsWith('.svg')) {
-            response = await axios.get('https:' + url.photoUrl, { responseType: 'text' });
-        } else {
-            response = await axios.get('https:' + url.photoUrl, { responseType: 'arraybuffer' });
-        }
+            const response = await axios.get('https:' + url.photoUrl, { responseType: 'text' });
+            fs.writeFileSync(`${dirPath}/${url.title}.svg`, response.data);
 
-        if (url.photoUrl.endsWith('.svg')) {
-            const { width, height } = getSvgSize(response.data);
-            console.log(url.title, "\twidth: ", width, "\theight: ", height)
-            await convertSvgToPng(response.data, `${dirPath}/${url.title}.png`, { width, height });
         } else {
-            fs.writeFileSync(`${dirPath}/${url.title}.png`, Buffer.from(response.data, 'binary'));
+            const response = await axios.get('https:' + url.photoUrl, { responseType: 'arraybuffer' });
+            fs.writeFileSync(`${dirPath}/${url.title}.webp`, Buffer.from(response.data, 'binary'));
         }
     }
 }
+
+const mmToPx = (mmValue, dpi = 96) => {
+    // 1 mm = dpi / 25.4 pixels
+    return mmValue * (dpi / 25.4);
+};
+
+const convertSvgSizeToPx = ({ width, height }) => {
+    const widthPx = width.endsWith('mm') ? mmToPx(parseFloat(width)) : parseFloat(width);
+    const heightPx = height.endsWith('mm') ? mmToPx(parseFloat(height)) : parseFloat(height);
+    return { width: `${widthPx}px`, height: `${heightPx}px` };
+};
 
 const getSvgSize = (svgContent) => {
     const { window } = new JSDOM(svgContent);
@@ -55,6 +60,13 @@ const getSvgSize = (svgContent) => {
             width = '1000px'; // 기본 너비
             height = '300px'; // 기본 높이
         }
+    }
+
+    // 단위가 mm이면 px로 변환
+    if (width.endsWith('mm') || height.endsWith('mm')) {
+        const convertedSize = convertSvgSizeToPx({ width, height });
+        width = convertedSize.width;
+        height = convertedSize.height;
     }
 
     return { width, height };

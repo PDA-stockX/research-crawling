@@ -53,5 +53,5 @@ const photoUrl = async () => {
     const photoUrls = await getLogo();
     fs.writeFileSync("../data/photoUrls.json", JSON.stringify(photoUrls));
 }
-photoUrl()
-// export default photoUrl;
+// photoUrl()
+export default photoUrl;

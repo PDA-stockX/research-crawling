@@ -18,12 +18,14 @@
     "fs": "^0.0.1-security",
     "iconv-lite": "^0.6.3",
     "is-url": "^1.2.4",
+    "jsdom": "^24.0.0",
     "mammoth": "^1.7.0",
     "node-fetch": "^3.3.2",
     "node-tesseract-ocr": "^2.2.1",
     "openai": "^4.28.4",
     "pdfjs-dist": "^4.0.379",
     "pdfjs-V2": "npm:pdfjs-dist@^2.14.305",
+    "puppeteer": "^22.6.1",
     "tesseract-ocr": "^1.0.0"
   }
 }
