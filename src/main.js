@@ -9,5 +9,5 @@ const main = async (start) => {
     // start = new Date(new Date().setHours(23, 59, 0, 0)); // 시작 날짜
     await readPdf(start);
 }
-
-export default main;
+main(new Date("2024-03-20T23:59:59"));
+// export default main;

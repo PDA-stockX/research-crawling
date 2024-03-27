@@ -1,7 +1,6 @@
 import fs from 'fs';
 import pdfjs from '../src/pdfjs.js'
 import extractName from './extractName.js'
-// import ocr from './useAdobeOcr.js'
 import extractNameEmail from '../src/extractNameEmail.js'
 
 import { str2date, date2str } from '../batch/date.js';
