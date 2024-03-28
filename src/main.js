@@ -6,7 +6,6 @@ const main = async (start) => {
         fs.mkdirSync("../output");
     }
 
-    // start = new Date(new Date().setHours(23, 59, 0, 0)); // 시작 날짜
     await readPdf(start);
 }
 

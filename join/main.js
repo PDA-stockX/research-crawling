@@ -14,12 +14,6 @@ const main = async (start, startIndex, apiCount) => {
     // apiCount = 25; // api로 가져오려는 데이터 갯수 (default: 100)
 
     await openApi(start, startIndex, apiCount);
-
-    // await openApi(
-    //     new Date(new Date(Date.now() - 86400000).setHours(0, 0, 0, 0)),
-    //     6934,
-    //     1562
-    // )
 }
-// main();
+
 export default main;

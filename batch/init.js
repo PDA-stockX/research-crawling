@@ -20,7 +20,7 @@ const init = async (
     end = new Date("2024-03-21T00:00:00");
 
     console.log("crawling...");
-    // await crawling(start, end);
+    await crawling(start, end);
 
     console.log("read pdf...");
     await pdf(start);
