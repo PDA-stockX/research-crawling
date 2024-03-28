@@ -1,8 +1,10 @@
-function extractNameEmail(text) {
+function usePdfjs(text) {
+    let email = null;
+    let name = null;
+
     // 애널리스트의 이메일 주소 추출
     const emailRegex = /([a-zA-Z0-9._-]+)@([a-zA-Z0-9._-]+)\.([a-z.]+)/;
     const emailMatch = text.match(emailRegex);
-    let email = null
     if (emailMatch) {
         email = emailMatch[0];
     }
@@ -17,20 +19,13 @@ function extractNameEmail(text) {
             : null;
     }
 
-    // 애널리스트의 이름 추출을 위한 정규표현식
-    const AnalystNameRegex = /(?:Analyst|\(Analyst\))\s*([ㄱ-ㅎㅏ-ㅣ가-힣\s]{2,6})/;
-    const nameMatch = text.match(AnalystNameRegex);
-    // let name = nameMatch ? nameMatch[1].replace(/\s/g, '') ? nameMatch[1].replace(/\s/g, '') : null : null;
-    let name = nameMatch
-        ? nameMatch[1].split(" ")[0].length >= 3
-            ? nameMatch[1].split(" ")[0]
-            : nameMatch[1].replace(/\s/g, '')
-                ? nameMatch[1].replace(/\s/g, '')
-                : null
-        : null;
+    // -위원 기준으로 이름 찾기
+    const classRegex = /위원/;
+    const classMatch = text.match(classRegex);
+    const classIndex = classMatch ? classMatch.index : 0;
 
     // 이름 추출을 위한 정규표현식
-    const nameRegex = /^(?!.*(팀장|대리|사원|선임|수석|연구원|연구위원|차전지|자동차|반도체))[ㄱ-ㅎㅏ-ㅣ가-힣_]{3,4}/;
+    const nameRegex = /^(?!.*(팀장|대리|사원|선임|수석|연구원|연구위원|전문위원|차전지|자동차|반도체))[ㄱ-ㅎㅏ-ㅣ가-힣_]{3,4}/;
 
     // 이메일 시작 인덱스를 기준으로 왼쪽으로 이동하며 이름을 찾기
     function shiftLeft(index) {
@@ -47,13 +42,16 @@ function extractNameEmail(text) {
         }
     }
 
-    if (email !== null && name === null) {
-        const temp = text.indexOf(email);
-        const emailIndex = temp !== -1 ? temp : text.indexOf('@');
-        shiftLeft(emailIndex - 1);
+    const squareIndex = text.indexOf('■');
+
+    if (squareIndex > classIndex) {
+        shiftLeft(squareIndex - 1);
+    }
+    else if (classIndex !== 0) {
+        shiftLeft(classIndex - 1);
     }
 
     return { name, email };
 }
 
-export default extractNameEmail;
+export default usePdfjs;

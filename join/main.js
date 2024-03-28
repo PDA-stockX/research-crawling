@@ -1,6 +1,11 @@
+import fs from 'fs';
 import openApi from "./openApi.js";
 
 const main = async (start, startIndex, apiCount) => {
+    if (!fs.existsSync("../result")) {
+        fs.mkdirSync("../result");
+    }
+
     /**
      * join 된 index:  (i+1)7472  /  64296   (count)4935  /  10000
      */
@@ -8,13 +13,7 @@ const main = async (start, startIndex, apiCount) => {
     // startIndex = 0; // i index (defalut: 0)
     // apiCount = 25; // api로 가져오려는 데이터 갯수 (default: 100)
 
-    // await openApi(start, startIndex, apiCount);
-
-    await openApi(
-        new Date(new Date(Date.now() - 86400000).setHours(0, 0, 0, 0)),
-        6934,
-        1562
-    )
+    await openApi(start, startIndex, apiCount);
 }
-main();
-// export default main;
+
+export default main;

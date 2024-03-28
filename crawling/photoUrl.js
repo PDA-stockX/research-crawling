@@ -39,7 +39,7 @@ const getLogo = async () => {
     const html = await fetchLogo(url);
     const $ = cheerio.load(html, { scriptingEnabled: false });
 
-    const data = $("span._5z5vsy6g div span.XBc8G3Rq span.sizHuKZx noscript img._2NID3an1").map((i, el) => {
+    const data = $("span div span span noscript img").map((i, el) => {
         return {
             title: $(el).prop("alt").split(" ")[0].replace(/\bCI\b$/, "").replace(/로고$/, ""),
             photoUrl: $(el).prop("src")
@@ -53,5 +53,5 @@ const photoUrl = async () => {
     const photoUrls = await getLogo();
     fs.writeFileSync("../data/photoUrls.json", JSON.stringify(photoUrls));
 }
-
+// photoUrl()
 export default photoUrl;
