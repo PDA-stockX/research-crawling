@@ -66,7 +66,6 @@ const getData = async (dataPath, outputPath) => {
 
 const openApi = async (start, startIndex, apiCount) => {
     const nullUrls = [];
-    const noApis = [];
 
     const dateStr = date2str(start);
     const dataPath = `../data/${dateStr}`
@@ -85,6 +84,8 @@ const openApi = async (start, startIndex, apiCount) => {
     let count = 0;
     for (let i = startIndex; i < reportList.length; i++) {
         if (count >= apiCount) break;
+        if (!('pdfUrl' in reportDetail[i])) continue;
+
         let name, email;
         const { firm, date, stock } = reportList[i];
         let refDate = new Date(date);
@@ -95,7 +96,7 @@ const openApi = async (start, startIndex, apiCount) => {
         const photoUrl = obj.length > 0 ? obj[0].photoUrl : null;
 
         ({ name, email } = nameEmail[i]);
-        if (name === null || email === null || photoUrl === null) {
+        if (name === null || email === null) {
             nullUrls.push({ i: i, pdfUrl: reportDetail[i].pdfUrl });
             fs.writeFileSync(`${dirPath}/nullUrls.json`, JSON.stringify(nullUrls));
         }

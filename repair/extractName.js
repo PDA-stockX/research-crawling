@@ -2,6 +2,23 @@ function usePdfjs(text) {
     let email = null;
     let name = null;
 
+    // 애널리스트의 이메일 주소 추출
+    const emailRegex = /([a-zA-Z0-9._-]+)@([a-zA-Z0-9._-]+)\.([a-z.]+)/;
+    const emailMatch = text.match(emailRegex);
+    if (emailMatch) {
+        email = emailMatch[0];
+    }
+    else {
+        const nextEmailRegex = /(?:(?:\d{2,4}-\d{2,4})(?:-\d{2,4})*)*([a-zA-Z0-9._-]*@[a-zA-Z0-9._-]+\.[a-z.]+)(?:RA)?/;
+        const textWithoutSpaces = text.replace(/\s/g, '');
+        const nextEmailMatch = textWithoutSpaces.match(nextEmailRegex);
+        email = nextEmailMatch
+            ? nextEmailMatch[1].replace(/.*Analyst\s*/, '').charAt(0) === '_'
+                ? nextEmailMatch[1].replace(/.*Analyst\s*/, '').substring(1)
+                : nextEmailMatch[1].replace(/.*Analyst\s*/, '')
+            : null;
+    }
+
     // -위원 기준으로 이름 찾기
     const classRegex = /위원/;
     const classMatch = text.match(classRegex);

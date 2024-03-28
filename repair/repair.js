@@ -24,21 +24,12 @@ const repair = async (start) => {
 
     let problemFirms = [];
     let problemFirmSet = new Set();
-    const dirPath = './temp';
-
-    if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath);
-    }
 
     for (const nullUrl of nullUrls) {
         const { i, pdfUrl } = nullUrl;
         const { name, firm, email, photoUrl } = Analyst[i];
 
-        problemFirms.push({ firm, pdfUrl });
-        problemFirmSet.add(firm);
-
-        // console.log(i, pdfUrl, name, firm, email, photoUrl);
-
+        console.log(i);
         if (pdfjsFirms.includes(firm)) {
             console.log("pdfjs version");
             await pdfjs(pdfUrl)
@@ -60,12 +51,13 @@ const repair = async (start) => {
             //     });
         }
         else {
+            problemFirms.push({ i, firm, pdfUrl });
+            problemFirmSet.add(firm);
             console.log("non covered")
         }
-        // console.log(Analyst[i]);
 
-        fs.writeFileSync("./Analyst.json", JSON.stringify(Analyst));
-        fs.writeFileSync("./Report.json", JSON.stringify(Report));
+        fs.writeFileSync(`${resultPath}/Analyst.json`, JSON.stringify(Analyst));
+        fs.writeFileSync(`${resultPath}/Report.json`, JSON.stringify(Report));
 
         fs.writeFileSync("./problemFirms.json", JSON.stringify(problemFirms));
         fs.writeFileSync("./problemFirmSet.json", JSON.stringify([...problemFirmSet]));
@@ -74,5 +66,5 @@ const repair = async (start) => {
     console.log("nullUrls: ", nullUrls.length);
     console.log(problemFirmSet);
 };
-// repair(new Date("2024-03-20T23:59:59"));
+
 export default repair;
