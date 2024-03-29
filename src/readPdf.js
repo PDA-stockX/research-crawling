@@ -50,7 +50,7 @@ async function readPdf(start) {
     const readBatches = async () => {
         const catchProblems = [];
         const n = urls.length;
-        let i = 0;
+        let i = -1;
 
         for (const url of urls) {
             await readBatch(url, ++i)
