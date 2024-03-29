@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import crawling from "../crawling/main.js";
 import pdf from "../src/main.js"
 import api from "../join/main.js"
+import repair from "../repair/main.js"
 
 import axios from "axios";
 import fs from 'fs';
