@@ -26,7 +26,7 @@ async function fetchRESEARCH(url, payload) {
 }
 
 // 아침 10시에 평일에 실행되는 스케줄링 (월요일부터 금요일까지)
-const job = cron.schedule('15 10 * * 1-5', async (
+const job = cron.schedule('0 10 * * 1-5', async (
     start = new Date(new Date().setHours(23, 59, 0, 0)),
     end = new Date(new Date(Date.now() - 86400000).setHours(0, 0, 0, 0)),
     startIndex = 0,
