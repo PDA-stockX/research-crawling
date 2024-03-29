@@ -38,21 +38,22 @@ const init = async (
     // end = new Date("2024-03-21T00:00:00"); // 끝 날짜 (default: 어제 0시 0분) - 제외
 
     // start = new Date("2024-03-20T23:59:59");
-    start = new Date(new Date().setHours(23, 59, 0, 0))
-    end = new Date("2024-03-21T00:00:00");
+    // start = new Date(new Date().setHours(23, 59, 0, 0))
+    // end = new Date("2024-03-21T00:00:00");
 
-    console.log("crawling...");
-    await crawling(start, end);
+    // console.log("crawling...");
+    // await crawling(start, end);
 
-    console.log("read pdf...");
-    await pdf(start);
+    // console.log("read pdf...");
+    // await pdf(start);
 
-    console.log("use api...");
-    await api(start, startIndex, apiCount);
+    // console.log("use api...");
+    // await api(start, startIndex, apiCount);
 
-    console.log("repair...");
-    await repair(start);
+    // console.log("repair...");
+    // await repair(start);
 
+    console.log("fetch research api...");
     const dateStr = date2str(start);
     const resultPath = `../result/${dateStr}`
     const { Analyst, Report, ReportSector } = await getData(resultPath);
@@ -63,6 +64,7 @@ const init = async (
         const payload = { report: Report[i], analyst: Analyst[i], reportSector: ReportSector[i] };
         await fetchRESEARCH(url, payload);
     }
+    console.log("Done!");
 }
 
 init();
