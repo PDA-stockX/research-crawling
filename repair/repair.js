@@ -29,7 +29,7 @@ const repair = async (start) => {
         const { i, pdfUrl } = nullUrl;
         const { name, firm, email, photoUrl } = Analyst[i];
 
-        console.log(i);
+        console.log(i, firm);
         if (pdfjsFirms.includes(firm)) {
             console.log("pdfjs version");
             await pdfjs(pdfUrl)
