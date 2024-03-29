@@ -1,7 +1,6 @@
 import crawling from "../crawling/main.js";
 import pdf from "../src/main.js"
 import api from "../join/main.js"
-import repair from "../repair/main.js"
 
 import axios from "axios";
 import fs from 'fs';
@@ -41,17 +40,14 @@ const init = async (
     // start = new Date(new Date().setHours(23, 59, 0, 0))
     // end = new Date("2024-03-21T00:00:00");
 
-    // console.log("crawling...");
-    // await crawling(start, end);
+    console.log("crawling...");
+    await crawling(start, end);
 
-    // console.log("read pdf...");
-    // await pdf(start);
+    console.log("read pdf...");
+    await pdf(start);
 
-    // console.log("use api...");
-    // await api(start, startIndex, apiCount);
-
-    // console.log("repair...");
-    // await repair(start);
+    console.log("use api...");
+    await api(start, startIndex, apiCount);
 
     console.log("fetch research api...");
     const dateStr = date2str(start);

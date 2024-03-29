@@ -110,7 +110,7 @@ const openApi = async (start, startIndex, apiCount) => {
         Analyst.push({ name, firm, email, photoUrl });
         Firm.add(firm);
         Report.push({ pdfUrl, name, email, investmentOpinion, ticker, stock, postedAt: date, refPrice, targetPrice, title, summary });
-        sectors.map((sector) => ReportSector.push({ pdfUrl, sectorName: sector }));
+        ReportSector.push({ pdfUrl, sectorName: sectors })
 
         console.log(i + 1, " / ", reportList.length, "\t", count, " / ", apiCount);
 
