@@ -50,6 +50,7 @@ const job = cron.schedule('0 10 * * 1-5', async (
     console.log("repair...");
     await repair(start);
 
+    console.log("fetch research api...");
     const dateStr = date2str(start);
     const resultPath = `../result/${dateStr}`
     const { Analyst, Report, ReportSector } = await getData(resultPath);
@@ -60,6 +61,7 @@ const job = cron.schedule('0 10 * * 1-5', async (
         const payload = { report: Report[i], analyst: Analyst[i], reportSector: ReportSector[i] };
         await fetchRESEARCH(url, payload);
     }
+    console.log("Done!");
 }, {
     timezone: "Asia/Seoul" // 시간대 설정 (예: 서울 시간대)
 });
