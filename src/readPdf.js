@@ -2,7 +2,7 @@ import fs from 'fs';
 
 import extractName from './extractName.js'
 import extractNameEmail from './extractNameEmail.js';
-import getContent from './pdfjs.js';
+import pdfjs from './pdfjs.js';
 
 import { str2date, date2str } from '../batch/date.js';
 
@@ -16,7 +16,7 @@ const getData = async (dataPath) => {
     return (reportList);
 }
 
-const pdfjsFirms = ["한국기술신용평가(주)", "나이스디앤비"];
+const noEmailFirms = ["한국기술신용평가(주)", "나이스디앤비"];
 const ocrFirms = ["미래에셋증권", "유안타증권"];
 
 async function readPdf(start) {
@@ -39,26 +39,33 @@ async function readPdf(start) {
         fs.writeFileSync(`${dirPath}/problemUrls.json`, JSON.stringify(problemUrls));
     };
 
+    const getAnalystInfo = async (url, firm) => {
+        if (ocrFirms.includes(firm)) {
+            console.log("ocr version");
+            // ocr 코드 추가
+            return ({ name: null, email: null });
+        }
+        else {
+            await pdfjs(url)
+                .then((reportString) => {
+                    if (noEmailFirms.includes(firm)) {
+                        console.log("no email version");
+                        return extractName(reportString);
+                    }
+                    else {
+                        console.log("standard version");
+                        return extractNameEmail(reportString)
+                    }
+                });
+        }
+    };
+
     const interval = 500; // 다운로드 간격 (밀리초) 
 
     const readBatch = async (url, i) => {
-        await getContent(url)
-            .then((reportString) => {
-                const firm = reportList[i].firm;
-                if (pdfjsFirms.includes(firm)) {
-                    console.log("pdfjs version");
-                    return extractName(reportString);
-                }
-                else if (ocrFirms.includes(firm)) {
-                    console.log("ocr version");
-                    // ocr 코드 추가
-                    return ({ name: null, email: null });
-                }
-                else {
-                    console.log("standard version");
-                    return extractNameEmail(reportString)
-                };
-            })
+        const firm = reportList[i].firm;
+
+        await getAnalystInfo(url, firm)
             .then((result) => {
                 const analystInfo = { pdfUrl: url, ...result };
                 nameEmail.push(analystInfo);

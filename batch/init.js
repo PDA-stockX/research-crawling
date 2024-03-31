@@ -40,6 +40,9 @@ const init = async (
     // start = new Date(new Date().setHours(23, 59, 0, 0))
     // end = new Date("2024-03-21T00:00:00");
 
+    start = new Date("2024-03-29T23:59:59");
+    end = new Date("2020-06-30T00:00:00");
+
     console.log("crawling...");
     await crawling(start, end);
 
