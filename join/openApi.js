@@ -51,7 +51,8 @@ const fetchStockApi = async (date, ticker, maxRetries = 10) => {
         }
     }
 
-    throw new Error("Max retries exceeded"); // 프로그램 종료를 위해 예외 발생
+    // throw new Error("Max retries exceeded"); // 프로그램 종료를 위해 예외 발생
+    return -1;
 }
 
 const getData = async (dataPath, outputPath) => {
@@ -66,6 +67,7 @@ const getData = async (dataPath, outputPath) => {
 
 const openApi = async (start, startIndex, apiCount) => {
     const nullUrls = [];
+    const noApis = [];
 
     const dateStr = date2str(start);
     const dataPath = `../data/${dateStr}`
@@ -103,11 +105,12 @@ const openApi = async (start, startIndex, apiCount) => {
         count++;
 
         const refPrice = await fetchStockApi(refDate, ticker);
+        if (refPrice === -1) noApis.push({ i: i, pdfUrl: reportDetail[i].pdfUrl });
 
         Analyst.push({ name, firm, email, photoUrl });
         Firm.add(firm);
         Report.push({ pdfUrl, name, email, investmentOpinion, ticker, stock, postedAt: date, refPrice, targetPrice, title, summary });
-        sectors.map((sector) => ReportSector.push({ pdfUrl, sectorName: sector }));
+        ReportSector.push({ pdfUrl, sectorName: sectors })
 
         console.log(i + 1, " / ", reportList.length, "\t", count, " / ", apiCount);
 

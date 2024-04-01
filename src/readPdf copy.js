@@ -1,8 +1,7 @@
 import fs from 'fs';
 
-import extractName from './extractName.js'
 import extractNameEmail from './extractNameEmail.js';
-import pdfjs from './pdfjs.js';
+import getContent from './pdfjs.js';
 
 import { str2date, date2str } from '../batch/date.js';
 
@@ -11,19 +10,10 @@ async function getUrls(dataPath) {
     return Object.values(json).map(item => item.pdfUrl);
 }
 
-const getData = async (dataPath) => {
-    const reportList = JSON.parse(fs.readFileSync(`${dataPath}/reportList.json`));
-    return (reportList);
-}
-
-const noEmailFirms = ["한국기술신용평가(주)", "나이스디앤비"];
-const ocrFirms = ["미래에셋증권", "유안타증권"];
-
 async function readPdf(start) {
     const dateStr = date2str(start);
     const dataPath = `../data/${dateStr}`
 
-    const reportList = await getData(dataPath);
     const urls = await getUrls(dataPath);
     const dirPath = `../output/${dateStr}`;
 
@@ -39,33 +29,11 @@ async function readPdf(start) {
         fs.writeFileSync(`${dirPath}/problemUrls.json`, JSON.stringify(problemUrls));
     };
 
-    const getAnalystInfo = async (url, firm) => {
-        if (ocrFirms.includes(firm)) {
-            console.log("ocr version");
-            // ocr 코드 추가
-            return ({ name: null, email: null });
-        }
-        else {
-            await pdfjs(url)
-                .then((reportString) => {
-                    if (noEmailFirms.includes(firm)) {
-                        console.log("no email version");
-                        return extractName(reportString);
-                    }
-                    else {
-                        console.log("standard version");
-                        return extractNameEmail(reportString)
-                    }
-                });
-        }
-    };
-
-    const interval = 500; // 다운로드 간격 (밀리초) 
+    const interval = 1000; // 다운로드 간격 (밀리초) 
 
     const readBatch = async (url, i) => {
-        const firm = reportList[i].firm;
-
-        await getAnalystInfo(url, firm)
+        await getContent(url)
+            .then((reportString) => extractNameEmail(reportString))
             .then((result) => {
                 const analystInfo = { pdfUrl: url, ...result };
                 nameEmail.push(analystInfo);
@@ -76,7 +44,7 @@ async function readPdf(start) {
             .catch(err => {
                 problemUrls.push({ i, url });
                 nameEmail.push({ pdfUrl: url, name: null, email: null });
-            });
+            }); // nameEmail에도 problemUrls 버전으로 넣어야했음
     };
 
     const readBatches = async () => {

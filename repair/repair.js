@@ -23,7 +23,6 @@ const repair = async (start) => {
     const { Analyst, Report, nullUrls } = await getData(resultPath);
 
     let problemFirms = [];
-    let problemFirmSet = new Set();
 
     for (const nullUrl of nullUrls) {
         const { i, pdfUrl } = nullUrl;
@@ -52,7 +51,6 @@ const repair = async (start) => {
         }
         else {
             problemFirms.push({ i, firm, pdfUrl });
-            problemFirmSet.add(firm);
             console.log("non covered")
         }
 
@@ -60,11 +58,9 @@ const repair = async (start) => {
         fs.writeFileSync(`${resultPath}/Report.json`, JSON.stringify(Report));
 
         fs.writeFileSync("./problemFirms.json", JSON.stringify(problemFirms));
-        fs.writeFileSync("./problemFirmSet.json", JSON.stringify([...problemFirmSet]));
     }
 
     console.log("nullUrls: ", nullUrls.length);
-    console.log(problemFirmSet);
 };
 
 export default repair;

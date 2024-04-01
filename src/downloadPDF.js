@@ -10,7 +10,14 @@ async function downloadPDF(url, filePath) {
     });
     response.data.pipe(fs.createWriteStream(filePath));
 
-    return response.data;
+    return new Promise((resolve, reject) => {
+        response.data.on('end', () => {
+            resolve();
+        });
+        response.data.on('error', (err) => {
+            reject(err);
+        });
+    });
 }
 
 export default downloadPDF; 

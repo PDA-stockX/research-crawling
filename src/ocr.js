@@ -1,75 +1,105 @@
-const fs = require('fs').promises; // fs 모듈을 promise 기반으로 사용
-const PDFServicesSdk = require('@adobe/pdfservices-node-sdk');
-const AdmZip = require('adm-zip');
-const path = require('path');
+import PDFServicesSdk from '@adobe/pdfservices-node-sdk';
+import fs from 'fs';
+import dotenv from 'dotenv';
+dotenv.config({ path: '../.env' });
+import downloadPDF from './downloadPDF.js'
 
-async function ocr(fileName) {
+const splittedPDF = async (url) => {
+    const tempPath = './temp.pdf'
+    await downloadPDF(url, tempPath);
+
     try {
-        // JSON 파일 읽기
-        const credentialsData = await fs.readFile(path.resolve(__dirname, '../pdfservices-api-credentials.json'), 'utf8'); // 비동기 파일 읽기 사용
-        const credentials = JSON.parse(credentialsData);
-
-        // 자격 증명 설정
-        const client_id = credentials.client_credentials.client_id;
-        const client_secret = credentials.client_credentials.client_secret;
-
         // Initial setup, create credentials instance.
-        const credentialsInstance = PDFServicesSdk.Credentials
+        const credentials = PDFServicesSdk.Credentials
             .servicePrincipalCredentialsBuilder()
-            .withClientId(client_id)
-            .withClientSecret(client_secret)
+            .withClientId(process.env.PDF_SERVICES_CLIENT_ID)
+            .withClientSecret(process.env.PDF_SERVICES_CLIENT_SECRET)
             .build();
 
-        const configBuilderInstance = PDFServicesSdk.ClientConfig;
-
-        const clientConfig = configBuilderInstance
-            .clientConfigBuilder()
-            .withConnectTimeout(1000 * 10) // 10 seconds
-            .withReadTimeout(1000 * 60) // 1 minute
-            .withProcessingTimeout(1000 * 60 * 10) // 10 minutes
-            .build();
-
-        // Create an ExecutionContext using credentials
-        const executionContext = PDFServicesSdk.ExecutionContext.create(credentialsInstance);
-
-        // Build extractPDF options
-        const options = new PDFServicesSdk.ExtractPDF.options.ExtractPdfOptions.Builder()
-            .addElementsToExtract(PDFServicesSdk.ExtractPDF.options.ExtractElementType.TEXT)
-            .build();
-
-        // Create a new operation instance.
-        const extractPDFOperation = PDFServicesSdk.ExtractPDF.Operation.createNew();
-        const input = PDFServicesSdk.FileRef.createFromLocalFile(
-            path.resolve(__dirname, `../resources/${fileName}.pdf`),
-            PDFServicesSdk.ExtractPDF.SupportedSourceFormat.pdf
-        );
+        //Create an ExecutionContext using credentials and create a new operation instance.
+        const executionContext = PDFServicesSdk.ExecutionContext.create(credentials),
+            splitPDFOperation = PDFServicesSdk.SplitPDF.Operation.createNew();
 
         // Set operation input from a source file.
-        extractPDFOperation.setInput(input);
+        const input = PDFServicesSdk.FileRef.createFromLocalFile(tempPath);
+        splitPDFOperation.setInput(input);
 
-        // Set options
-        extractPDFOperation.setOptions(options);
+        // Provide any custom configuration options for the operation.
+        splitPDFOperation.setPageCount(2);
 
-        // Execute the operation and save the result to a temporary file
-        const outputFilePath = path.resolve(__dirname, `./output/${fileName}.zip`);
-        await extractPDFOperation.execute(executionContext)
-            .then(result => result.saveAsFile(outputFilePath));
+        //Generating a file name
+        let splittedPdfPath = './splitted.pdf';
 
-        // Extract text data from the temporary zip file and return it
-        const zip = new AdmZip(outputFilePath);
-        const jsonString = zip.readAsText('structuredData.json');
-        const data = JSON.parse(jsonString).elements
-            .filter(element => element.Page === 0 && element.Text)
-            .map(element => element.Text)
-            .join(' ');
+        // Execute the operation and Save the result to the specified location.
+        splitPDFOperation.execute(executionContext)
+            .then(result => result.saveAsFile(splittedPdfPath))
+            .catch(err => {
+                if (err instanceof PDFServicesSdk.Error.ServiceApiError
+                    || err instanceof PDFServicesSdk.Error.ServiceUsageError) {
+                    console.log('Exception encountered while executing operation', err);
+                } else {
+                    console.log('Exception encountered while executing operation', err);
+                }
+            });
+    } catch (err) {
+        console.log('Exception encountered while executing operation', err);
+    }
 
-        // Delete the temporary zip file
-        await fs.unlink(outputFilePath); // 비동기 파일 삭제 사용
+    // fs.unlink(pdfPath);
+}
+splittedPDF("https://ssl.pstatic.net/imgstock/upload/research/company/1711067985855.pdf") // 미래에셋
 
-        return data;
+const ocr = async (url) => {
+    try {
+        // Initial setup, create credentials instance.
+        const credentials = PDFServicesSdk.Credentials
+            .servicePrincipalCredentialsBuilder()
+            .withClientId(process.env.PDF_SERVICES_CLIENT_ID)
+            .withClientSecret(process.env.PDF_SERVICES_CLIENT_SECRET)
+            .build();
+
+        //Create an ExecutionContext using credentials and create a new operation instance.
+        const executionContext = PDFServicesSdk.ExecutionContext.create(credentials),
+            ocrOperation = PDFServicesSdk.OCR.Operation.createNew();
+
+        // Set operation input from a source file.
+        const input = PDFServicesSdk.FileRef.createFromLocalFile("");
+        ocrOperation.setInput(input);
+
+        // Provide any custom configuration options for the operation.
+        const options = new PDFServicesSdk.OCR.options.OCROptions.Builder()
+            .withOcrType(PDFServicesSdk.OCR.options.OCRSupportedType.SEARCHABLE_IMAGE_EXACT)
+            .withOcrLang(PDFServicesSdk.OCR.options.OCRSupportedLocale.KO_KR)
+            .build();
+        ocrOperation.setOptions(options);
+
+        //Generating a file name
+        let outputFilePath = createOutputFilePath();
+
+        // Execute the operation and Save the result to the specified location.
+        ocrOperation.execute(executionContext)
+            .then(result => result.saveAsFile(outputFilePath))
+            .catch(err => {
+                if (err instanceof PDFServicesSdk.Error.ServiceApiError
+                    || err instanceof PDFServicesSdk.Error.ServiceUsageError) {
+                    console.log('Exception encountered while executing operation', err);
+                } else {
+                    console.log('Exception encountered while executing operation', err);
+                }
+            });
+
+        //Generates a string containing a directory structure and file name for the output file.
+        function createOutputFilePath() {
+            let date = new Date();
+            let dateString = date.getFullYear() + "-" + ("0" + (date.getMonth() + 1)).slice(-2) + "-" +
+                ("0" + date.getDate()).slice(-2) + "T" + ("0" + date.getHours()).slice(-2) + "-" +
+                ("0" + date.getMinutes()).slice(-2) + "-" + ("0" + date.getSeconds()).slice(-2);
+            return ("output/OCRPDFWithOptions/ocr" + dateString + ".pdf");
+        }
+
     } catch (err) {
         console.log('Exception encountered while executing operation', err);
     }
 }
 
-module.exports = ocr;
+// export default ocr;
