@@ -24,7 +24,7 @@ const post = async (start) => {
     const dateStr = date2str(start);
     const resultPath = `../result/${dateStr}`
     const { Analyst, Report, ReportSector } = await getData(resultPath);
-    const url = "http://localhost:3000/reports";
+    const url = "http://15.165.71.109:80/api/reports";
     const n = Analyst.length;
 
     for (let i = 0; i < n; i++) {
