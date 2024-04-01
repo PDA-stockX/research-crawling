@@ -27,6 +27,8 @@ async function readPdf(start) {
     const urls = await getUrls(dataPath);
     const dirPath = `../output/${dateStr}`;
 
+    console.log(reportList.length, urls.length);
+
     const nameEmail = [];
     const problemUrls = [];
 
@@ -46,7 +48,7 @@ async function readPdf(start) {
             return ({ name: null, email: null });
         }
         else {
-            await pdfjs(url)
+            return await pdfjs(url)
                 .then((reportString) => {
                     if (noEmailFirms.includes(firm)) {
                         console.log("no email version");
@@ -60,14 +62,13 @@ async function readPdf(start) {
         }
     };
 
-    const interval = 500; // 다운로드 간격 (밀리초) 
-
     const readBatch = async (url, i) => {
         const firm = reportList[i].firm;
 
         await getAnalystInfo(url, firm)
             .then((result) => {
                 const analystInfo = { pdfUrl: url, ...result };
+                console.log(analystInfo);
                 nameEmail.push(analystInfo);
                 if (!(result.name && result.email)) {
                     problemUrls.push({ i, url });
@@ -96,7 +97,7 @@ async function readPdf(start) {
                     nameEmail.push({ pdfUrl: url, name: null, email: null });
                     fs.writeFileSync(`${dirPath}/stop.json`, catchProblems);
                 })
-            await new Promise(resolve => setTimeout(resolve, interval)).catch(err => console.error(err));
+            if (i % 100 === 0) console.log(i, " / ", n);
         }
     };
 

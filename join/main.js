@@ -1,6 +1,10 @@
 import fs from 'fs';
 import openApi from "./openApi.js";
 
+import repair from "./repair.js";
+import fix from "./getRefPrice.js";
+import eli from "./eliminatePassFirms.js";
+
 const main = async (start, startIndex, apiCount) => {
     if (!fs.existsSync("../result")) {
         fs.mkdirSync("../result");
@@ -13,7 +17,8 @@ const main = async (start, startIndex, apiCount) => {
     // startIndex = 0; // i index (defalut: 0)
     // apiCount = 25; // api로 가져오려는 데이터 갯수 (default: 100)
 
-    await openApi(start, startIndex, apiCount);
+    // await openApi(start, startIndex, apiCount);
+    await repair(start, startIndex, apiCount);
 }
 
 export default main;

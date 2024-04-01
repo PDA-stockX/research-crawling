@@ -27,13 +27,14 @@ const init = async (
     end = new Date("2020-03-31T00:00:00");
 
     console.log("crawling...");
-    await crawling(start, end);
+    // await crawling(start, end);
 
     console.log("read pdf...");
-    await pdf(start);
+    // await pdf(start);
 
     console.log("use api...");
-    await api(start, startIndex, apiCount);
+    // await api(start, startIndex, apiCount);
+    await api(start, startIndex, 19000);
 
     console.log("fetch research api...");
     await post(start);

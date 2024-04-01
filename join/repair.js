@@ -59,15 +59,42 @@ const getData = async (dataPath, outputPath) => {
     const reportList = JSON.parse(fs.readFileSync(`${dataPath}/reportList.json`));
     const reportDetail = JSON.parse(fs.readFileSync(`${dataPath}/reportDetail.json`));
     const stockDetail = JSON.parse(fs.readFileSync(`${dataPath}/stockDetail.json`));
-    const photoUrls = JSON.parse(fs.readFileSync('../data/photoUrls.json'));
 
     const nameEmail = JSON.parse(fs.readFileSync(`${outputPath}/nameEmail.json`));
-    return ({ reportList, reportDetail, stockDetail, nameEmail, photoUrls });
+    return ({ reportList, reportDetail, stockDetail, nameEmail });
+}
+
+const getResultData = async (resultPath) => {
+    const Analyst = JSON.parse(fs.readFileSync(`${resultPath}/Analyst.json`));
+    const Report = JSON.parse(fs.readFileSync(`${resultPath}/Report.json`));
+    const Firm = JSON.parse(fs.readFileSync(`${resultPath}/Firm.json`));
+    const ReportSector = JSON.parse(fs.readFileSync(`${resultPath}/ReportSector.json`));
+
+    return { Analyst, Report, Firm, ReportSector };
+}
+
+const merge = async (r1, r2, r3) => {
+    const bAnalyst = [...r1.Analyst, ...r2.Analyst, ...r3.Analyst];
+    const bReport = [...r1.Report, ...r2.Report, ...r3.Report];
+    const bFirm = [...r1.Firm, ...r2.Firm, ...r3.Firm];
+    const bReportSector = [...r1.ReportSector, ...r2.ReportSector, ...r3.ReportSector];
+
+    return { bAnalyst, bReport, bFirm, bReportSector };
 }
 
 const passFirms = ['DS투자증권', '미래에셋증권', '유안타증권'];
 
 const openApi = async (start, startIndex, apiCount) => {
+    const result1 = "../result/before/20240329";
+    const result2 = "../result/before/20240328";
+    const result3 = "../result/before/20240320";
+
+    const { bAnalyst, bReport, bFirm, bReportSector } = await merge(
+        await getResultData(result1),
+        await getResultData(result2),
+        await getResultData(result3)
+    );
+
     const nullUrls = [];
     const noApis = [];
 
@@ -76,8 +103,9 @@ const openApi = async (start, startIndex, apiCount) => {
     const outputPath = `../output/${dateStr}`
     const dirPath = `../result/${dateStr}`
 
-    const { reportList, reportDetail, stockDetail, nameEmail, photoUrls } = await getData(dataPath, outputPath);
+    const { reportList, reportDetail, stockDetail, nameEmail } = await getData(dataPath, outputPath);
     console.log(reportList.length, reportDetail.length, stockDetail.length, nameEmail.length)
+    console.log(bAnalyst.length, bReport.length, bFirm.length, bReportSector.length);
 
     if (!fs.existsSync(dirPath)) {
         fs.mkdirSync(dirPath);
@@ -85,16 +113,25 @@ const openApi = async (start, startIndex, apiCount) => {
 
     let Analyst = [], Firm = new Set(), Report = [], ReportSector = [];
 
+    let j = -1;
     let count = 0;
     for (let i = startIndex; i < reportList.length; i++) {
         if (count >= apiCount) break;
         if (!('pdfUrl' in reportDetail[i])) continue;
+        j++;
+        if (j === bReport.length) break;
 
         let name, email;
         const { firm, date, stock } = reportList[i];
-        if (passFirms.includes(firm)) continue;
-        let refDate = new Date(date);
+        if (passFirms.includes(firm)) {
+            continue
+        };
+        // let refDate = new Date(date);
         const { pdfUrl, targetPrice, investmentOpinion, title, summary } = reportDetail[i];
+        if (pdfUrl !== bReport[j].pdfUrl) {
+            j--;
+            continue;
+        }
         const { ticker, sectors } = stockDetail[i];
 
         const photoUrl = null;
@@ -106,7 +143,8 @@ const openApi = async (start, startIndex, apiCount) => {
         }
         count++;
 
-        const refPrice = await fetchStockApi(refDate, ticker);
+        // const refPrice = await fetchStockApi(refDate, ticker);
+        const refPrice = bReport[j].refPrice;
         if (refPrice === -1) noApis.push({ i: i, pdfUrl: reportDetail[i].pdfUrl });
 
         Analyst.push({ name, firm, email, photoUrl });
@@ -114,7 +152,7 @@ const openApi = async (start, startIndex, apiCount) => {
         Report.push({ pdfUrl, name, email, investmentOpinion, ticker, stock, postedAt: date, refPrice, targetPrice, title, summary });
         ReportSector.push({ pdfUrl, sectorName: sectors })
 
-        console.log(i + 1, " / ", reportList.length, "\t", count, " / ", apiCount);
+        console.log(i + 1, " / ", reportList.length, "\tj: ", j + 1, " / ", bReport.length);
 
         fs.writeFileSync(`${dirPath}/Analyst.json`, JSON.stringify(Analyst));
         fs.writeFileSync(`${dirPath}/Firm.json`, JSON.stringify([...Firm]));

@@ -1,6 +1,5 @@
 import axios from 'axios';
 import fs from 'fs';
-fs.WriteStream
 
 async function downloadPDF(url, filePath) {
     const response = await axios({
@@ -12,7 +11,7 @@ async function downloadPDF(url, filePath) {
 
     return new Promise((resolve, reject) => {
         response.data.on('end', () => {
-            resolve();
+            resolve(filePath);
         });
         response.data.on('error', (err) => {
             reject(err);
@@ -20,4 +19,4 @@ async function downloadPDF(url, filePath) {
     });
 }
 
-export default downloadPDF; 
+export default downloadPDF;

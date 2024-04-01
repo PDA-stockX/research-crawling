@@ -1,12 +1,14 @@
 import PDFServicesSdk from '@adobe/pdfservices-node-sdk';
-import fs from 'fs';
+import fs from 'fs/promises';
 import dotenv from 'dotenv';
 dotenv.config({ path: '../.env' });
 import downloadPDF from './downloadPDF.js'
 
 const splittedPDF = async (url) => {
     const tempPath = './temp.pdf'
-    await downloadPDF(url, tempPath);
+
+    //Generating a file name
+    const pdfPath = './splitted.pdf';
 
     try {
         // Initial setup, create credentials instance.
@@ -18,21 +20,30 @@ const splittedPDF = async (url) => {
 
         //Create an ExecutionContext using credentials and create a new operation instance.
         const executionContext = PDFServicesSdk.ExecutionContext.create(credentials),
-            splitPDFOperation = PDFServicesSdk.SplitPDF.Operation.createNew();
+            SplitPDF = PDFServicesSdk.SplitPDF,
+            splitPDFOperation = SplitPDF.Operation.createNew();
 
         // Set operation input from a source file.
-        const input = PDFServicesSdk.FileRef.createFromLocalFile(tempPath);
+        const input = PDFServicesSdk.FileRef.createFromLocalFile(
+            tempPath,
+            PDFServicesSdk.SplitPDF.SupportedSourceFormat.pdf
+        );
         splitPDFOperation.setInput(input);
 
         // Provide any custom configuration options for the operation.
-        splitPDFOperation.setPageCount(2);
+        splitPDFOperation.setPageCount(4);
 
-        //Generating a file name
-        let splittedPdfPath = './splitted.pdf';
+        await downloadPDF(url, tempPath);
 
         // Execute the operation and Save the result to the specified location.
-        splitPDFOperation.execute(executionContext)
-            .then(result => result.saveAsFile(splittedPdfPath))
+        await splitPDFOperation.execute(executionContext)
+            .then(async result => {
+                let saveFilesPromises = [];
+                for (let i = 0; i < result.length; i++) {
+                    saveFilesPromises.push(result[i].saveAsFile(pdfPath));
+                }
+                await Promise.all(saveFilesPromises);
+            })
             .catch(err => {
                 if (err instanceof PDFServicesSdk.Error.ServiceApiError
                     || err instanceof PDFServicesSdk.Error.ServiceUsageError) {
@@ -41,15 +52,21 @@ const splittedPDF = async (url) => {
                     console.log('Exception encountered while executing operation', err);
                 }
             });
+
+        return pdfPath;
     } catch (err) {
         console.log('Exception encountered while executing operation', err);
+    } finally {
+        await fs.unlink(tempPath);
     }
-
-    // fs.unlink(pdfPath);
 }
-splittedPDF("https://ssl.pstatic.net/imgstock/upload/research/company/1711067985855.pdf") // 미래에셋
 
 const ocr = async (url) => {
+    const pdfPath = await splittedPDF(url);
+
+    //Generating a file name
+    const outputFilePath = './searchable.pdf';
+
     try {
         // Initial setup, create credentials instance.
         const credentials = PDFServicesSdk.Credentials
@@ -63,7 +80,7 @@ const ocr = async (url) => {
             ocrOperation = PDFServicesSdk.OCR.Operation.createNew();
 
         // Set operation input from a source file.
-        const input = PDFServicesSdk.FileRef.createFromLocalFile("");
+        const input = PDFServicesSdk.FileRef.createFromLocalFile(pdfPath);
         ocrOperation.setInput(input);
 
         // Provide any custom configuration options for the operation.
@@ -72,9 +89,6 @@ const ocr = async (url) => {
             .withOcrLang(PDFServicesSdk.OCR.options.OCRSupportedLocale.KO_KR)
             .build();
         ocrOperation.setOptions(options);
-
-        //Generating a file name
-        let outputFilePath = createOutputFilePath();
 
         // Execute the operation and Save the result to the specified location.
         ocrOperation.execute(executionContext)
@@ -88,18 +102,14 @@ const ocr = async (url) => {
                 }
             });
 
-        //Generates a string containing a directory structure and file name for the output file.
-        function createOutputFilePath() {
-            let date = new Date();
-            let dateString = date.getFullYear() + "-" + ("0" + (date.getMonth() + 1)).slice(-2) + "-" +
-                ("0" + date.getDate()).slice(-2) + "T" + ("0" + date.getHours()).slice(-2) + "-" +
-                ("0" + date.getMinutes()).slice(-2) + "-" + ("0" + date.getSeconds()).slice(-2);
-            return ("output/OCRPDFWithOptions/ocr" + dateString + ".pdf");
-        }
-
+        return outputFilePath;
     } catch (err) {
         console.log('Exception encountered while executing operation', err);
+    } finally {
+        await fs.unlink(pdfPath);
     }
 }
+const result = ocr("https://ssl.pstatic.net/imgstock/upload/research/company/1711067985855.pdf") // 미래에셋
+// const result2 = ocr("https://ssl.pstatic.net/imgstock/upload/research/company/1711928403013.pdf") // 유안타증권
 
 // export default ocr;
